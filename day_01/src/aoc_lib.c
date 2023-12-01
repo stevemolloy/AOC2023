@@ -38,7 +38,7 @@ int get_value_from_str(char **str, int *first, int *last) {
     if (strncmp(digit_strings[i], *str, strlen(digit_strings[i]))==0) {
       *last = i+1;
       if (*first < 0) *first = i+1;
-      (*str) += strlen(digit_strings[i]) - 1;
+      (*str)++;
       return 1;
     }
   }
