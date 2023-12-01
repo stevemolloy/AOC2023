@@ -1,7 +1,7 @@
 CC = clang
-CFLAGS = -Wall -Wpedantic -Wextra -ggdb -std=c18
-CINCLUDES = -I/home/smolloy/Code/grid_meshing_c/includes/
-CLIBS = -lm
+CFLAGS = -O2 -Wall -Wpedantic -Wextra -ggdb -std=c18
+CINCLUDES = -I/home/smolloy/Code/AOC2023/libs
+CLIBS = 
 
 SRC = src
 OBJ = obj
@@ -16,7 +16,7 @@ all: $(BIN)
 
 $(BIN): $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@
+	$(CC) $(CFLAGS) $(CINCLUDES) $^ -o $@ $(CLIBS)
 
 $(OBJ)/%.o: $(SRC)/%.c
 	@mkdir -p $(@D)
