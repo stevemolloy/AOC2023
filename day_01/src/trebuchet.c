@@ -4,6 +4,8 @@
 #include <string.h>
 #include <errno.h>
 
+const char* digit_strings[] = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+
 int main(void) {
   char *file_path = "./real_input.txt";
   FILE *f = fopen(file_path, "r");
@@ -27,6 +29,12 @@ int main(void) {
       if (isdigit(*cursor)) {
         last = *cursor - '0';
         if (first < 0) first = *cursor - '0';
+      }
+      for (size_t i=0; i<9; i++) {
+        if (strncmp(digit_strings[i], cursor, strlen(digit_strings[i]))==0) {
+          last = i+1;
+          if (first < 0) first = i+1;
+        }
       }
       cursor++;
     }
