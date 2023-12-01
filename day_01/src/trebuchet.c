@@ -17,7 +17,7 @@ int main(void) {
   int sz = ftell(f);
   fseek(f, 0L, SEEK_SET);
 
-  char *contents = calloc(sz, sizeof(char));
+  char *contents = calloc(2*sz, sizeof(char));
   fread(contents, 1, sz, f);
 
   char *cursor = contents;
@@ -43,6 +43,9 @@ int main(void) {
   }
 
   printf("Sum = %d\n", sum);
+
+  free(contents);
+  fclose(f);
 
   return 0;
 }
