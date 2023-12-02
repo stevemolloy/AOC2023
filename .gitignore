@@ -4,3 +4,7 @@ day_01/.cache/clangd/index
 day_01/compile_commands.json
 libs/obj
 libs/libAOC.a
+day_02/.cache/clangd/index
+day_02/bin
+day_02/obj
+day_02/compile_commands.json
