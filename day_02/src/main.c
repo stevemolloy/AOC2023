@@ -21,9 +21,7 @@ void get_game_stats(char *cursor, size_t *game_total, size_t *power) {
     cursor += 2;
     while (*cursor == ' ') cursor++;
 
-    size_t max_blue  = 0;
-    size_t max_red   = 0;
-    size_t max_green = 0;
+    size_t max_blue = 0, max_red = 0, max_green = 0;
     while (*cursor != '\n') {
       size_t ball_count = 0;
       while (*cursor != ' ') {
@@ -48,7 +46,6 @@ void get_game_stats(char *cursor, size_t *game_total, size_t *power) {
     cursor++;
 
     if (max_blue <= 14 && max_red <= 12 && max_green <= 13) *game_total += game_num;
-
     *power += max_blue * max_red * max_green;
   }
 }
