@@ -8,3 +8,7 @@ day_02/.cache/clangd/index
 day_02/bin
 day_02/obj
 day_02/compile_commands.json
+day_03/.cache/clangd/index
+day_03/bin
+day_03/obj
+day_03/compile_commands.json
