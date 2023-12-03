@@ -65,3 +65,33 @@ size_t get_value_from_line(char **string) {
   return first*10 + last;
 }
 
+void get_dims_of_char_matrix(char *contents, size_t *w, size_t *h) {
+  char *cursor = contents;
+
+  *w = 0;
+  *h = 0;
+
+  while(*cursor) {
+    if (*cursor=='\n') break;
+    (*w)++;
+    cursor++;
+  }
+
+  cursor = contents;
+  while (*cursor) {
+    if (*cursor == '\n') (*h)++;
+    cursor++;
+  }
+}
+
+void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *grid) {
+  char *cursor = string;
+  for (size_t x=0; x<cols; x++) {
+    for (size_t y=0; y<rows; y++) {
+      if (*cursor == '\n') cursor++;
+      grid[x*cols + y] = *cursor;
+      cursor++;
+    }
+  }
+}
+

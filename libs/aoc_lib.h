@@ -9,5 +9,9 @@ size_t get_value_from_line(char **string);
 
 char *read_entire_file(char *file_path);
 
+void get_dims_of_char_matrix(char *contents, size_t *w, size_t *h);
+
+void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *grid);
+
 #endif /* ifndef _AOC_LIB_H */
 
