@@ -6,7 +6,7 @@ LIB_OBJ_DIR = ../libs/obj
 LIB_SRCS = $(wildcard $(LIB_SRC_DIR)/*.c)
 LIB_OBJS = $(patsubst $(LIB_SRC_DIR)/%.c, $(LIB_OBJ_DIR)/%.o, $(LIB_SRCS))
 LIBRARY = ../libs/libAOC.a
-CINCLUDES = -I/home/smolloy/Code/AOC2023/libs $(LIB_CFLAGS)
+CINCLUDES = $(LIB_CFLAGS)
 CLIBS = -L../libs -lAOC
 
 SRC = src

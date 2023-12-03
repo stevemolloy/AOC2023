@@ -5,9 +5,7 @@ SUBDIRS := $(wildcard day*/)
 all: $(SUBDIRS)
 
 $(SUBDIRS):
-	@echo "Running make in $@"
 	@$(MAKE) -C $@
-	@echo "Make in $@ completed."
 
 .PHONY: all clean $(SUBDIRS)
 
