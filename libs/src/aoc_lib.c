@@ -107,7 +107,7 @@ void advance_past_chars(char **string, char *chars) {
   while (strchr(chars, **string)) (*string)++;
 }
 
-void go_to_next_line(char **string) {
+void advance_to_next_line(char **string) {
   while (**string != '\n') (*string)++;
   (*string)++;
 }

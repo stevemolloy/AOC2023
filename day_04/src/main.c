@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
       my_nums[i] = val;
     }
 
-    go_to_next_line(&cursor);
+    advance_to_next_line(&cursor);
 
     size_t matches = 0;
     for (size_t i=0; i<num_my_nums; i++) {
