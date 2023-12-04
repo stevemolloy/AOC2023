@@ -1,3 +1,4 @@
+#include <string.h>
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -5,6 +6,10 @@
 #include <stdbool.h>
 
 #include "aoc_lib.h"
+
+void advance_to_char(char **string, char c) {
+  while (**string != c) (*string)++;
+}
 
 int main(int argc, char **argv) {
   if (argc != 2) {
@@ -15,17 +20,13 @@ int main(int argc, char **argv) {
   char *contents = read_entire_file(file_path);
   char *cursor = contents;
 
-  size_t num_games = 0;
-  while (*cursor) {
-    if (*cursor == '\n') num_games++;
-    cursor++;
-  }
+  size_t num_games = count_lines(cursor);
 
   size_t num_wn = 0, num_my_nums = 0;
   bool cnting_wn = true, is_num = false;
 
   cursor = contents;
-  while (*cursor == ':' || *cursor == ' ') cursor++;
+  advance_past_chars(&contents, ": ");
 
   while (*cursor != '\n') {
     if (cnting_wn && isdigit(*cursor) && !is_num) {
@@ -51,9 +52,8 @@ int main(int argc, char **argv) {
 
   cursor = contents;
   for (size_t line=0; line<num_games; line++) {
-    while (*cursor != ':') cursor++;
-    cursor += 1;
-    while (*cursor == ' ') cursor++;
+    advance_to_char(&cursor, ':');
+    advance_past_chars(&cursor, ": ");
 
     for (size_t i=0; i<num_wn; i++) {
       size_t val = 0;
@@ -61,13 +61,12 @@ int main(int argc, char **argv) {
         val = val*10 + *cursor - '0';
         cursor++;
       }
-      while (*cursor == ' ') cursor++;
+      advance_past_chars(&cursor, " ");
       wns[i] = val;
     }
 
-    while (*cursor != '|') cursor++;
-    cursor++;
-    while (*cursor == ' ') cursor++;
+    advance_to_char(&cursor, '|');
+    advance_past_chars(&cursor, "| ");
 
     for (size_t i=0; i<num_my_nums; i++) {
       size_t val = 0;
@@ -75,12 +74,11 @@ int main(int argc, char **argv) {
         val = val*10 + *cursor - '0';
         cursor++;
       }
-      while (*cursor == ' ') cursor++;
+      advance_past_chars(&cursor, " ");
       my_nums[i] = val;
     }
 
-    while (*cursor != '\n') cursor++;
-    cursor++;
+    go_to_next_line(&cursor);
 
     size_t matches = 0;
     for (size_t i=0; i<num_my_nums; i++) {

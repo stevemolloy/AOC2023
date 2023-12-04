@@ -103,3 +103,21 @@ size_t sum_vector(size_t *vect, size_t N) {
   return result;
 }
 
+void advance_past_chars(char **string, char *chars) {
+  while (strchr(chars, **string)) (*string)++;
+}
+
+void go_to_next_line(char **string) {
+  while (**string != '\n') (*string)++;
+  (*string)++;
+}
+
+size_t count_lines(char *contents) {
+  size_t result = 0;
+  while (*contents) {
+    if (*contents == '\n') result++;
+    contents++;
+  }
+  return result;
+}
+

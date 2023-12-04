@@ -15,5 +15,11 @@ void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *gr
 
 size_t sum_vector(size_t *vect, size_t N);
 
+void advance_past_chars(char **string, char *chars);
+
+void go_to_next_line(char **string);
+
+size_t count_lines(char *contents);
+
 #endif /* ifndef _AOC_LIB_H */
 
