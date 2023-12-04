@@ -7,10 +7,6 @@
 
 #include "aoc_lib.h"
 
-void advance_to_char(char **string, char c) {
-  while (**string != c) (*string)++;
-}
-
 int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "Provide a single argument -- the file to be parsed.\n");

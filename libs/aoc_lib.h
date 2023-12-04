@@ -21,5 +21,7 @@ void advance_to_next_line(char **string);
 
 size_t count_lines(char *contents);
 
+void advance_to_char(char **string, char c);
+
 #endif /* ifndef _AOC_LIB_H */
 

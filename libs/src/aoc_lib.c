@@ -121,3 +121,7 @@ size_t count_lines(char *contents) {
   return result;
 }
 
+void advance_to_char(char **string, char c) {
+  while (**string != c) (*string)++;
+}
+
