@@ -95,3 +95,11 @@ void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *gr
   }
 }
 
+size_t sum_vector(size_t *vect, size_t N) {
+  size_t result = 0;
+  for (size_t i=0; i<N; i++) {
+    result += vect[i];
+  }
+  return result;
+}
+

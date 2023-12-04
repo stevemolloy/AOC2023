@@ -13,5 +13,7 @@ void get_dims_of_char_matrix(char *contents, size_t *w, size_t *h);
 
 void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *grid);
 
+size_t sum_vector(size_t *vect, size_t N);
+
 #endif /* ifndef _AOC_LIB_H */
 
