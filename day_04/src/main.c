@@ -6,9 +6,12 @@
 
 #include "aoc_lib.h"
 
-int main(void) {
-  // char * file_path = "./test_input_1.txt";
-  char * file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Provide a single argument -- the file to be parsed.\n");
+    return 1;
+  }
+  char * file_path = argv[1];
   char *contents = read_entire_file(file_path);
   char *cursor = contents;
 
@@ -103,6 +106,8 @@ int main(void) {
 
   free(wns);
   free(my_nums);
+  free(plays);
+  free(contents);
 
   return 0;
 }
