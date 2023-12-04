@@ -9,6 +9,8 @@ size_t get_value_from_line(char **string);
 
 char *read_entire_file(char *file_path);
 
+size_t read_entire_file_to_lines(char *file_path, char **buffer, char ***lines);
+
 void get_dims_of_char_matrix(char *contents, size_t *w, size_t *h);
 
 void make_data_grid_from_string(char *string, size_t cols, size_t rows, char *grid);
@@ -22,6 +24,8 @@ void advance_to_next_line(char **string);
 size_t count_lines(char *contents);
 
 void advance_to_char(char **string, char c);
+
+size_t string_to_lines(char **string, char ***lines);
 
 #endif /* ifndef _AOC_LIB_H */
 

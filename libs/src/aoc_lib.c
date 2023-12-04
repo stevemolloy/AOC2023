@@ -1,8 +1,17 @@
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
+#include "../aoc_lib.h"
+
+size_t read_entire_file_to_lines(char *file_path, char **buffer, char ***lines) {
+  *buffer = read_entire_file(file_path);
+  size_t num_lines = string_to_lines(buffer, lines);
+  return num_lines;
+}
 
 char *read_entire_file(char *file_path) {
   // Reads an entire file into a char array, and returns a ptr to this. The ptr should be freed by the caller
@@ -26,6 +35,25 @@ char *read_entire_file(char *file_path) {
   fclose(f);
   
   return contents;
+}
+
+size_t string_to_lines(char **string, char ***lines) {
+  char *cursor = *string;
+  size_t num_lines = count_lines(cursor);
+
+  *lines = calloc(num_lines, sizeof(char*));
+
+  size_t line_ctr = 0;
+  while (*cursor) {
+    (*lines)[line_ctr] = cursor;
+    assert(line_ctr < num_lines);
+    advance_to_char(&cursor, '\n');
+    *cursor = '\0';
+    (cursor)++;
+    line_ctr++;
+  }
+
+  return num_lines;
 }
 
 int get_value_from_str(char **str, int *first, int *last) {
@@ -104,7 +132,9 @@ size_t sum_vector(size_t *vect, size_t N) {
 }
 
 void advance_past_chars(char **string, char *chars) {
-  while (strchr(chars, **string)) (*string)++;
+  while (strchr(chars, **string)) {
+    (*string)++;
+  }
 }
 
 void advance_to_next_line(char **string) {

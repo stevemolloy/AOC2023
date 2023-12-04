@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stddef.h>
@@ -12,19 +13,20 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Provide a single argument -- the file to be parsed.\n");
     return 1;
   }
-  char * file_path = argv[1];
-  char *contents = read_entire_file(file_path);
+  
+  char *contents;
+  char **lines = {0};
+  size_t num_games = read_entire_file_to_lines(argv[1], &contents, &lines);
   char *cursor = contents;
-
-  size_t num_games = count_lines(cursor);
 
   size_t num_wn = 0, num_my_nums = 0;
   bool cnting_wn = true, is_num = false;
 
   cursor = contents;
-  advance_past_chars(&contents, ": ");
+  advance_to_char(&cursor, ':');
+  advance_past_chars(&cursor, ": ");
 
-  while (*cursor != '\n') {
+  while (*cursor) {
     if (cnting_wn && isdigit(*cursor) && !is_num) {
       is_num = true;
       num_wn++;
@@ -46,8 +48,8 @@ int main(int argc, char **argv) {
 
   for (size_t i=0; i<num_games; i++) plays[i] = 1;
 
-  cursor = contents;
   for (size_t line=0; line<num_games; line++) {
+    cursor = lines[line];
     advance_to_char(&cursor, ':');
     advance_past_chars(&cursor, ": ");
 
@@ -70,11 +72,9 @@ int main(int argc, char **argv) {
         val = val*10 + *cursor - '0';
         cursor++;
       }
-      advance_past_chars(&cursor, " ");
+      cursor++;
       my_nums[i] = val;
     }
-
-    advance_to_next_line(&cursor);
 
     size_t matches = 0;
     for (size_t i=0; i<num_my_nums; i++) {
@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
   free(plays);
   free(scores);
   free(contents);
+  free(lines);
 
   return 0;
 }
