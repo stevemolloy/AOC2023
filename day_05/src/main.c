@@ -131,11 +131,35 @@ int main(int argc, char **argv) {
       }
     }
     if (does_seed_exist(key, lines[0])) {
-      printf("Answer to part 2 = %zu\n", location);
       break;
     }
   }
 
+  size_t test_val = location;
+  for (location=0; location<=test_val; location++) {
+    if (location%100000 == 0) printf("Testing location = %zu\n", location);
+    size_t key = location;
+    for (int map=MAPS_COUNT-1; map>=0; map--) {
+      size_t end_of_map = (map<MAPS_COUNT-1) ? map_lines[map+1] - 1 : num_lines;
+      for (size_t i=map_lines[map]+1; i<end_of_map; i++) {
+        char *cursor = lines[i];
+        size_t dst_range_start = get_next_val_from_string(&cursor);
+        cursor++;
+        size_t src_range_start = get_next_val_from_string(&cursor);
+        cursor++;
+        size_t range_length = get_next_val_from_string(&cursor);
+
+        if (key>=dst_range_start && key<(dst_range_start+range_length)) {
+          key = src_range_start + (key - dst_range_start);
+          break;
+        }
+      }
+    }
+    if (does_seed_exist(key, lines[0])) {
+      printf("Answer to part 2 = %zu\n", location);
+      break;
+    }
+  }
   free(lines);
   free(contents);
 
