@@ -34,9 +34,16 @@ bool does_seed_exist(size_t seed_num, char* line) {
   return false;
 }
 
-int main(void) {
-  // char *file_path = "./test_input_1.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  // I do part two in a brute force way, but bottom-up from location to seed number
+  // This is not as crazy slow as seed-to-location brute force, but still takes 10 minutes.
+  // A better algorithm (probably based on ranges) is needed.
+  
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single argument -- the file to be parsed.\n");
+    return 1;
+  }
+  char *file_path = argv[1];
   char *contents;
   char **lines;
   size_t num_lines = read_entire_file_to_lines(file_path, &contents, &lines);
@@ -87,7 +94,7 @@ int main(void) {
   advance_to_char(&seed_cursor, ':');
   advance_past_chars(&seed_cursor, ": ");
 
-  for (size_t location = 386981295-10000000; ; location++) {
+  for (size_t location = 0; ; location++) {
     if (location%100000 == 0) printf("Testing location = %zu\n", location);
     size_t key = location;
     for (int map=MAPS_COUNT-1; map>=0; map--) {
