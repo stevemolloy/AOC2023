@@ -27,5 +27,7 @@ void advance_to_char(char **string, char c);
 
 size_t string_to_lines(char **string, char ***lines);
 
+size_t get_next_val_from_string(char **string);
+
 #endif /* ifndef _AOC_LIB_H */
 

@@ -155,3 +155,18 @@ void advance_to_char(char **string, char c) {
   while (**string != c) (*string)++;
 }
 
+size_t get_next_val_from_string(char **string) {
+  if (!isdigit(**string)) {
+    fprintf(stderr, "%s does not begin with a digit", *string);
+    exit(1);
+  }
+  size_t result = 0;
+
+  do {
+    result = result*10 + **string - '0';
+    (*string)++;
+  } while (isdigit(**string));
+
+  return result;
+}
+

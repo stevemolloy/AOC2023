@@ -19,21 +19,6 @@ const char *map_names[] = {
   "humidity-to-location",
 };
 
-size_t get_next_val_from_string(char **string) {
-  if (!isdigit(**string)) {
-    fprintf(stderr, "%s does not begin with a digit", *string);
-    exit(1);
-  }
-  size_t result = 0;
-
-  do {
-    result = result*10 + **string - '0';
-    (*string)++;
-  } while (isdigit(**string));
-
-  return result;
-}
-
 bool does_seed_exist(size_t seed_num, char* line) {
   char *seed_cursor = line;
   advance_to_char(&seed_cursor, ':');
