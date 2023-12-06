@@ -1,24 +1,18 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "aoc_lib.h"
 
-size_t count_digits(size_t val) {
-  size_t cnt_digits = 0;
-  while (val > 0) {
-    cnt_digits++;
-    val = val / 10;
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single argument -- the file to be parsed.\n");
+    return 1;
   }
-  return cnt_digits;
-}
-
-int main(void) {
-  char *file_path = "./real_input.txt";
-  // char *file_path = "./test_input_1.txt";
   char *buffer;
   char **lines;
-  size_t num_lines = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_lines = read_entire_file_to_lines(argv[1], &buffer, &lines);
   assert(num_lines == 2);
 
   char *time_cursor = lines[0];
@@ -45,17 +39,8 @@ int main(void) {
 
     product *= num_victories;
 
-    size_t cnt_digits_time = count_digits(time);
-    size_t cnt_digits_dist = count_digits(dist);
-
-    size_t factor;
-    factor = 1;
-    while (cnt_digits_time--) factor *= 10;
-    corrected_time = corrected_time * factor + time;
-
-    factor = 1;
-    while (cnt_digits_dist--) factor *= 10;
-    corrected_dist = corrected_dist * factor + dist;
+    corrected_time = corrected_time * ten_to_the_power_of(count_digits(time)) + time;
+    corrected_dist = corrected_dist * ten_to_the_power_of(count_digits(dist)) + dist;
   }
 
   printf("Answer to part 1 = %zu\n", product);
@@ -65,6 +50,9 @@ int main(void) {
     if ((corrected_time - test_time) * test_time > corrected_dist) num_victories++;
   }
   printf("Answer to part 2 = %zu\n", num_victories);
+
+  free(buffer);
+  free(lines);
 
   return 0;
 }

@@ -29,5 +29,9 @@ size_t string_to_lines(char **string, char ***lines);
 
 size_t get_next_val_from_string(char **string);
 
+size_t count_digits(size_t val);
+
+size_t ten_to_the_power_of(size_t exp);
+
 #endif /* ifndef _AOC_LIB_H */
 

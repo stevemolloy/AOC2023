@@ -171,3 +171,18 @@ size_t get_next_val_from_string(char **string) {
   return result;
 }
 
+size_t count_digits(size_t val) {
+  size_t cnt_digits = 0;
+  while (val > 0) {
+    cnt_digits++;
+    val = val / 10;
+  }
+  return cnt_digits;
+}
+
+size_t ten_to_the_power_of(size_t exp) {
+    size_t factor = 1;
+    while (exp--) factor *= 10;
+    return factor;
+}
+
