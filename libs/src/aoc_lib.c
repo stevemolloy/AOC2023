@@ -132,6 +132,7 @@ size_t sum_vector(size_t *vect, size_t N) {
 }
 
 void advance_past_chars(char **string, char *chars) {
+  if (**string == '\0') return;
   while (strchr(chars, **string)) {
     (*string)++;
   }
