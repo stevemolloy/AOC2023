@@ -6,3 +6,4 @@ libs/obj
 libs/libAOC.a
 .cache/clangd/index
 compile_commands.json
+*/*.txt

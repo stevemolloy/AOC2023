@@ -1,7 +1,9 @@
+#include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "aoc_lib.h"
 
@@ -52,6 +54,19 @@ size_t convert_card(char card) {
   }
 }
 
+size_t convert_card_with_jokers(char card) {
+  if (isdigit(card)) return card - '0';
+  else if (card == 'T') return 10;
+  else if (card == 'J') return 0;
+  else if (card == 'Q') return 12;
+  else if (card == 'K') return 13;
+  else if (card == 'A') return 14;
+  else {
+    fprintf(stderr, "Unreachable\n");
+    exit(1);
+  }
+}
+
 Type get_hand_type(Play play) {
   size_t counts[15] = {0};
   for (size_t i=0; i<5; i++) {
@@ -74,6 +89,110 @@ Type get_hand_type(Play play) {
   return HIGH_CARD;
 }
 
+Type get_hand_type_with_jokers(Play play) {
+  size_t counts[15] = {0};
+  for (size_t i=0; i<5; i++) {
+    size_t card_val = convert_card_with_jokers(play.hand[i]);
+    counts[card_val]++;
+  }
+
+  Type result = HIGH_CARD;
+  size_t pairs_found = 0;
+  bool found_a_three = false;
+  for (size_t c=1; c<15; c++) {
+    if (counts[c] == 0 || counts[c] == 1) continue;
+    else if (counts[c] == 5) result = FIVE_KIND;
+    else if (counts[c] == 4) result = FOUR_KIND;
+    else if (counts[c] == 3) found_a_three = true;
+    else if (counts[c] == 2 && pairs_found == 1) {
+      result = TWO_PAIR;
+      pairs_found++;
+    }
+    else if (counts[c] == 2 && found_a_three) result = FULL_HOUSE;
+    else if (counts[c] == 2) pairs_found = 1;
+  }
+  if (pairs_found==1 && found_a_three) result = FULL_HOUSE;
+  else if (pairs_found == 1) result = ONE_PAIR;
+  else if (found_a_three) result = THREE_OF_KIND;
+
+  if (counts[0] == 0) return result;
+  else if (counts[0] == 1) {
+    switch (result) {
+      case HIGH_CARD:
+        result = ONE_PAIR;
+				break;
+      case ONE_PAIR:
+        result = THREE_OF_KIND;
+				break;
+      case TWO_PAIR:
+        result = FULL_HOUSE;
+				break;
+      case THREE_OF_KIND:
+        result = FOUR_KIND;
+				break;
+      case FOUR_KIND:
+        result = FIVE_KIND;
+				break;
+      case FULL_HOUSE:
+      case FIVE_KIND:
+        assert(0 && "Unreachable");
+				break;
+    }
+  } else if (counts[0] == 2) {
+    switch (result) {
+      case HIGH_CARD:
+        result = THREE_OF_KIND;
+				break;
+      case ONE_PAIR:
+        result = FOUR_KIND;
+				break;
+      case THREE_OF_KIND:
+        result = FIVE_KIND;
+				break;
+      case TWO_PAIR:
+      case FULL_HOUSE:
+      case FOUR_KIND:
+      case FIVE_KIND:
+        assert(0 && "Unreachable");
+				break;
+    }
+  } else if (counts[0] == 3) {
+    switch (result) {
+      case HIGH_CARD:
+        result = FOUR_KIND;
+				break;
+      case ONE_PAIR:
+        result = FIVE_KIND;
+				break;
+      case TWO_PAIR:
+      case THREE_OF_KIND:
+      case FULL_HOUSE:
+      case FOUR_KIND:
+      case FIVE_KIND:
+        assert(0 && "Unreachable");
+				break;
+    }
+  } else if (counts[0] == 4) {
+    switch (result) {
+      case HIGH_CARD:
+        result = FIVE_KIND;
+				break;
+      case ONE_PAIR:
+      case TWO_PAIR:
+      case THREE_OF_KIND:
+      case FULL_HOUSE:
+      case FOUR_KIND:
+      case FIVE_KIND:
+        assert(0 && "Unreachable");
+				break;
+    }
+  } else if (counts[0] == 5) {
+    result = FIVE_KIND;
+  }
+
+  return result;
+}
+
 int compare_hands(const void* a, const void* b) { 
   Play play_1 = *(Play*)a;
   Play play_2 = *(Play*)b;
@@ -93,9 +212,30 @@ int compare_hands(const void* a, const void* b) {
   return 0;
 }
 
+int compare_hands_with_jokers(const void* a, const void* b) { 
+  Play play_1 = *(Play*)a;
+  Play play_2 = *(Play*)b;
+
+  Type hand_1_type = get_hand_type_with_jokers(play_1);
+  Type hand_2_type = get_hand_type_with_jokers(play_2);
+
+  if (hand_1_type != hand_2_type) {
+    return hand_1_type - hand_2_type;
+  }
+
+  for (size_t c=0; c<5; c++) {
+    size_t a_val = convert_card_with_jokers(play_1.hand[c]);
+    size_t b_val = convert_card_with_jokers(play_2.hand[c]);
+    if (a_val != b_val) return a_val - b_val;
+  }
+
+  return 0;
+}
+
 int main(void) {
   // char *file_path = "./test_input.txt";
   char *file_path = "./real_input.txt";
+  // char *file_path = "./my_test_input.txt";
   char *buffer;
   char **lines;
   size_t num_lines = read_entire_file_to_lines(file_path, &buffer, &lines);
@@ -111,15 +251,26 @@ int main(void) {
     plays[l].bid = get_next_val_from_string(&cursor);
   }
 
-  qsort(plays, num_lines, sizeof(Play), compare_hands);
+  size_t total;
 
-  size_t total = 0;
+  qsort(plays, num_lines, sizeof(Play), compare_hands);
+  total = 0;
   for (size_t i=0; i<num_lines; i++) {
     size_t rank = i + 1;
     total += plays[i].bid * rank;
   }
-
+  if (strcmp(file_path,"./real_input.txt")==0) assert(total == 250370104 && "You have broken part 1!\n");
   printf("Answer to part 1 = %zu\n", total);
+
+  qsort(plays, num_lines, sizeof(Play), compare_hands_with_jokers);
+  total = 0;
+  for (size_t i=0; i<num_lines; i++) {
+    size_t rank = i + 1;
+    total += plays[i].bid * rank;
+    printf("(%3zu) %s --> %s : Bid = %zu : Bid*rank = %zu (Total: %zu))\n",
+        rank, plays[i].hand, type_string(get_hand_type_with_jokers(plays[i])), plays[i].bid, plays[i].bid*rank, total);
+  }
+  printf("Answer to part 2 = %zu\n", total);
 
   free(plays);
   free(lines);
