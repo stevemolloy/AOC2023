@@ -24,20 +24,13 @@ typedef enum {
 
 char *type_string(Type t) {
   switch (t) {
-    case HIGH_CARD:
-      return "HIGH_CARD";
-    case ONE_PAIR:
-      return "ONE_PAIR";
-    case TWO_PAIR:
-      return "TWO_PAIR";
-    case THREE_OF_KIND:
-      return "THREE_OF_KIND";
-    case FULL_HOUSE:
-      return "FULL_HOUSE";
-    case FOUR_KIND:
-      return "FOUR_KIND";
-    case FIVE_KIND:
-      return "FIVE_KIND";
+    case HIGH_CARD:     return "HIGH_CARD";
+    case ONE_PAIR:      return "ONE_PAIR";
+    case TWO_PAIR:      return "TWO_PAIR";
+    case THREE_OF_KIND: return "THREE_OF_KIND";
+    case FULL_HOUSE:    return "FULL_HOUSE";
+    case FOUR_KIND:     return "FOUR_KIND";
+    case FIVE_KIND:     return "FIVE_KIND";
   }
 }
 
@@ -76,16 +69,17 @@ Type get_hand_type(Play play) {
   bool found_a_pair = false;
   bool found_a_three = false;
   for (size_t c=1; c<15; c++) {
-    if (counts[c] == 5) return FIVE_KIND;
-    else if (counts[c] == 4) return FOUR_KIND;
-    else if (counts[c] == 3) found_a_three = true;
-    else if (counts[c] == 2 && found_a_pair) return TWO_PAIR;
+    if (counts[c] == 5)                       return FIVE_KIND;
+    else if (counts[c] == 4)                  return FOUR_KIND;
+    else if (counts[c] == 3)                  found_a_three = true;
+    else if (counts[c] == 2 && found_a_pair)  return TWO_PAIR;
     else if (counts[c] == 2 && found_a_three) return FULL_HOUSE;
-    else if (counts[c] == 2) found_a_pair = true;
+    else if (counts[c] == 2)                  found_a_pair = true;
   }
-  if (found_a_pair && found_a_three) return FULL_HOUSE;
-  else if (found_a_pair) return ONE_PAIR;
-  else if (found_a_three) return THREE_OF_KIND;
+  if (found_a_pair && found_a_three)          return FULL_HOUSE;
+  else if (found_a_pair)                      return ONE_PAIR;
+  else if (found_a_three)                     return THREE_OF_KIND;
+
   return HIGH_CARD;
 }
 
@@ -100,16 +94,22 @@ Type get_hand_type_with_jokers(Play play) {
   size_t pairs_found = 0;
   bool found_a_three = false;
   for (size_t c=1; c<15; c++) {
-    if (counts[c] == 0 || counts[c] == 1) continue;
-    else if (counts[c] == 5) result = FIVE_KIND;
-    else if (counts[c] == 4) result = FOUR_KIND;
-    else if (counts[c] == 3) found_a_three = true;
+    if (counts[c] == 5) {
+      result = FIVE_KIND;
+      break;
+    } else if (counts[c] == 4) {
+      result = FOUR_KIND;
+      break;
+    } else if (counts[c] == 3) found_a_three = true;
     else if (counts[c] == 2 && pairs_found == 1) {
       result = TWO_PAIR;
       pairs_found++;
+      break;
     }
-    else if (counts[c] == 2 && found_a_three) result = FULL_HOUSE;
-    else if (counts[c] == 2) pairs_found = 1;
+    else if (counts[c] == 2 && found_a_three) {
+      result = FULL_HOUSE;
+      break;
+    } else if (counts[c] == 2) pairs_found = 1;
   }
   if (pairs_found==1 && found_a_three) result = FULL_HOUSE;
   else if (pairs_found == 1) result = ONE_PAIR;
