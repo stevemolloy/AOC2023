@@ -105,15 +105,14 @@ Type get_hand_type_with_jokers(Play play) {
       result = TWO_PAIR;
       pairs_found++;
       break;
-    }
-    else if (counts[c] == 2 && found_a_three) {
+    } else if (counts[c] == 2 && found_a_three) {
       result = FULL_HOUSE;
       break;
     } else if (counts[c] == 2) pairs_found = 1;
   }
   if (pairs_found==1 && found_a_three) result = FULL_HOUSE;
   else if (pairs_found == 1) result = ONE_PAIR;
-  else if (found_a_three) result = THREE_OF_KIND;
+  else if (found_a_three && result != FULL_HOUSE) result = THREE_OF_KIND;
 
   if (counts[0] == 0) return result;
   else if (counts[0] == 1) {
@@ -267,8 +266,6 @@ int main(void) {
   for (size_t i=0; i<num_lines; i++) {
     size_t rank = i + 1;
     total += plays[i].bid * rank;
-    printf("(%3zu) %s --> %s : Bid = %zu : Bid*rank = %zu (Total: %zu))\n",
-        rank, plays[i].hand, type_string(get_hand_type_with_jokers(plays[i])), plays[i].bid, plays[i].bid*rank, total);
   }
   printf("Answer to part 2 = %zu\n", total);
 
