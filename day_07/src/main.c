@@ -231,13 +231,15 @@ int compare_hands_with_jokers(const void* a, const void* b) {
   return 0;
 }
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
-  // char *file_path = "./my_test_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single input -- the file with the data.\n");
+    return 1;
+  }
+
   char *buffer;
   char **lines;
-  size_t num_lines = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_lines = read_entire_file_to_lines(argv[1], &buffer, &lines);
 
   Play *plays = calloc(num_lines, sizeof(Play));
 
@@ -258,7 +260,6 @@ int main(void) {
     size_t rank = i + 1;
     total += plays[i].bid * rank;
   }
-  if (strcmp(file_path,"./real_input.txt")==0) assert(total == 250370104 && "You have broken part 1!\n");
   printf("Answer to part 1 = %zu\n", total);
 
   qsort(plays, num_lines, sizeof(Play), compare_hands_with_jokers);
