@@ -10,8 +10,7 @@
 
 typedef struct {
   char *name;
-  char *left;
-  char *right;
+  char *LR[2];
 } Node;
 
 typedef struct {
@@ -66,12 +65,14 @@ int main(int argc, char **argv) {
   size_t num_lines = read_entire_file_to_lines(argv[1], &buffer, &lines);
 
   size_t instruction_count = strlen(lines[0]);
+  size_t *instructions = calloc(instruction_count, sizeof(size_t));
+  for (size_t i=0; i<instruction_count; i++) {
+    instructions[i] = (lines[0][i]=='L') ? 0 : 1;
+  }
 
   size_t num_nodes = num_lines - 2;
 
   Map_Element *map = NULL;
-
-  // Node *nodes = calloc(num_nodes, sizeof(Node));
   for (size_t i=0; i<num_nodes; i++) {
     char *cursor = lines[i+2];
     Node node = (Node) {0};
@@ -80,28 +81,24 @@ int main(int argc, char **argv) {
     *cursor = '\0';
     advance_to_char(&cursor, '(');
     cursor++;
-    node.left = cursor;
+    node.LR[0] = cursor;
     cursor += 3;
     *cursor = '\0';
     cursor += 2;
-    node.right = cursor;
+    node.LR[1] = cursor;
     cursor += 3;
     *cursor = '\0';
 
     shput(map, node.name, node);
   }
 
-  // size_t current_node = get_node_by_name(nodes, num_nodes, "AAA");
   Node current_node = shget(map, "AAA");
   size_t steps_taken = 0;
   for (size_t i=0; ; i = (i+1) % instruction_count) {
+    size_t instruction = instructions[i];
     Node n = current_node;
-    if (strncmp(n.name, "ZZZ", 3) == 0) {
-      printf("Done!\n");
-      break;
-    }
-    if (lines[0][i] == 'L') current_node = shget(map, n.left);
-    else current_node = shget(map, n.right);
+    if (strncmp(n.name, "ZZZ", 3) == 0) break;
+    current_node = shget(map, n.LR[instruction]);
     steps_taken++;
   }
 
@@ -120,14 +117,13 @@ int main(int argc, char **argv) {
   for (size_t i=0; i<num_start_points; i++) {
     size_t steps_taken = 0;
     for (size_t j=0; ; j = (j+1) % instruction_count) {
-      char instruction = lines[0][j];
+      size_t instruction = instructions[j];
       Node n = map[active_nodes[i]].value;
       if (n.name[2] == 'Z') {
         steps[i] = steps_taken;
         break;
       }
-      if (instruction == 'L') active_nodes[i] = shgeti(map, n.left);
-      else active_nodes[i] = shgeti(map, n.right);
+      active_nodes[i] = shgeti(map, n.LR[instruction]);
       steps_taken++;
     }
   }
@@ -140,6 +136,7 @@ int main(int argc, char **argv) {
   hmfree(map);
   free(active_nodes);
   free(steps);
+  free(instructions);
 
   return 0;
 }
