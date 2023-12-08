@@ -49,14 +49,14 @@ size_t count_starting_nodes(Node *nodes, size_t num_nodes) {
   return result;
 }
 
-int main(void) {
-  // char *file_path = "./test_input_1.txt";
-  // char *file_path = "./test_input_2.txt";
-  // char *file_path = "./test_for_part2.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Provide a single input -- the file to be analysed\n");
+    return 1;
+  }
   char *buffer;
   char **lines;
-  size_t num_lines = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_lines = read_entire_file_to_lines(argv[1], &buffer, &lines);
 
   size_t instruction_count = strlen(lines[0]);
 
@@ -74,27 +74,25 @@ int main(void) {
     nodes[i].right = cursor;
   }
 
-  // size_t current_node = get_node_by_name(nodes, num_nodes, "AAA");
-  // size_t steps_taken = 0;
-  // for (size_t i=0; ; i = (i+1) % instruction_count) {
-  //   Node n = nodes[current_node];
-  //   printf("Name of current node = %s\n", n.name);
-  //   if (strncmp(n.name, "ZZZ", 3) == 0) {
-  //     printf("Done!\n");
-  //     break;
-  //   }
-  //   if (lines[0][i] == 'L') {
-  //     current_node = get_node_by_name(nodes, num_nodes, n.left);
-  //   } else {
-  //     current_node = get_node_by_name(nodes, num_nodes, n.right);
-  //   }
-  //   steps_taken++;
-  // }
-  //
-  // printf("Answer to part 1 = %zu\n", steps_taken);
-  //
+  size_t current_node = get_node_by_name(nodes, num_nodes, "AAA");
+  size_t steps_taken = 0;
+  for (size_t i=0; ; i = (i+1) % instruction_count) {
+    Node n = nodes[current_node];
+    if (strncmp(n.name, "ZZZ", 3) == 0) {
+      printf("Done!\n");
+      break;
+    }
+    if (lines[0][i] == 'L') {
+      current_node = get_node_by_name(nodes, num_nodes, n.left);
+    } else {
+      current_node = get_node_by_name(nodes, num_nodes, n.right);
+    }
+    steps_taken++;
+  }
+
+  printf("Answer to part 1 = %zu\n", steps_taken);
+
   size_t num_start_points = count_starting_nodes(nodes, num_nodes);
-  printf("Number of starting nodes = %zu\n", num_start_points);
 
   size_t *active_nodes = calloc(num_start_points, sizeof(size_t));
   size_t an_index = 0;
@@ -112,7 +110,6 @@ int main(void) {
       Node n = nodes[active_nodes[i]];
       if (n.name[2] == 'Z') {
         steps[i] = steps_taken;
-        printf("Done with node %zu in %zu steps\n", i, steps_taken);
         break;
       }
       if (instruction == 'L') {
@@ -126,6 +123,12 @@ int main(void) {
 
   size_t ans = lcm(steps, num_start_points);
   printf("Answer to part 2 = %zu\n", ans);
+
+  free(buffer);
+  free(lines);
+  free(nodes);
+  free(active_nodes);
+  free(steps);
 
   return 0;
 }

@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wpedantic -Wextra -ggdb -std=c18
+CFLAGS = -O3 -Wall -Wpedantic -Wextra -ggdb -std=c18
 LIB_CFLAGS = -I../libs
 LIB_SRC_DIR = ../libs/src
 LIB_OBJ_DIR = ../libs/obj
