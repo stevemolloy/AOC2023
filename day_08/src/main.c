@@ -48,10 +48,10 @@ bool check_all_at_end(Node *nodes, size_t *inds, size_t ind_count) {
   return true;
 }
 
-size_t count_starting_nodes(Node *nodes, size_t num_nodes) {
+size_t count_starting_nodes(Map_Element *nodes, size_t num_nodes) {
   size_t result = 0;
   for (size_t i=0; i<num_nodes; i++) {
-    if (nodes[i].name[2] == 'A') result++;
+    if (nodes[i].value.name[2] == 'A') result++;
   }
   return result;
 }
@@ -107,39 +107,39 @@ int main(int argc, char **argv) {
 
   printf("Answer to part 1 = %zu\n", steps_taken);
 
-  // size_t num_start_points = count_starting_nodes(nodes, num_nodes);
-  //
-  // size_t *active_nodes = calloc(num_start_points, sizeof(size_t));
-  // size_t an_index = 0;
-  // for (size_t i=0; i<num_nodes; i++) {
-  //   if (nodes[i].name[2] == 'A') active_nodes[an_index++] = i;
-  // }
-  //
-  // size_t *steps = calloc(num_start_points, sizeof(size_t));
-  //
-  // for (size_t i=0; i<num_start_points; i++) {
-  //   size_t steps_taken = 0;
-  //   for (size_t j=0; ; j = (j+1) % instruction_count) {
-  //     char instruction = lines[0][j];
-  //     Node n = nodes[active_nodes[i]];
-  //     if (n.name[2] == 'Z') {
-  //       steps[i] = steps_taken;
-  //       break;
-  //     }
-  //     if (instruction == 'L') active_nodes[i] = get_node_by_name(nodes, num_nodes, n.left);
-  //     else active_nodes[i] = get_node_by_name(nodes, num_nodes, n.right);
-  //     steps_taken++;
-  //   }
-  // }
-  //
-  // size_t ans = lcm(steps, num_start_points);
-  // printf("Answer to part 2 = %zu\n", ans);
-  //
-  // free(buffer);
-  // free(lines);
-  // free(nodes);
-  // free(active_nodes);
-  // free(steps);
+  size_t num_start_points = count_starting_nodes(map, num_nodes);
+
+  size_t *active_nodes = calloc(num_start_points, sizeof(size_t));
+  size_t an_index = 0;
+  for (size_t i=0; i<num_nodes; i++) {
+    if (map[i].value.name[2] == 'A') active_nodes[an_index++] = i;
+  }
+
+  size_t *steps = calloc(num_start_points, sizeof(size_t));
+
+  for (size_t i=0; i<num_start_points; i++) {
+    size_t steps_taken = 0;
+    for (size_t j=0; ; j = (j+1) % instruction_count) {
+      char instruction = lines[0][j];
+      Node n = map[active_nodes[i]].value;
+      if (n.name[2] == 'Z') {
+        steps[i] = steps_taken;
+        break;
+      }
+      if (instruction == 'L') active_nodes[i] = shgeti(map, n.left);
+      else active_nodes[i] = shgeti(map, n.right);
+      steps_taken++;
+    }
+  }
+
+  size_t ans = lcm(steps, num_start_points);
+  printf("Answer to part 2 = %zu\n", ans);
+
+  free(buffer);
+  free(lines);
+  hmfree(map);
+  free(active_nodes);
+  free(steps);
 
   return 0;
 }
