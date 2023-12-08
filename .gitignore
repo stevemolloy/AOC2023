@@ -10,5 +10,5 @@ compile_commands.json
 day_08/callgrind.out.3125122
 day_08/inputreader.py
 day_08/py_solution.py
-day_08/__pycache__
-day_08/callgrind.out.3179349
+*/__pycache__
+*/callgrind*
