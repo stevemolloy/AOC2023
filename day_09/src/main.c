@@ -75,6 +75,9 @@ int main(void) {
   printf("Answer to part 1 = %d\n", total_part1);
   printf("Answer to part 2 = %d\n", total_part2);
 
+  free(buffer);
+  free(lines);
+
   return 0;
 }
 
