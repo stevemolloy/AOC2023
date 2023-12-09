@@ -44,8 +44,8 @@ int main(void) {
   int total_part1 = 0;
   int total_part2 = 0;
   for (size_t i=0; i<num_lines; i++) {
-    size_t num_numbers = 0;
     char *cursor = lines[i];
+    size_t num_numbers = 0;
     while (*cursor) {
       if (*cursor==' ') num_numbers++;
       cursor++;
@@ -53,15 +53,11 @@ int main(void) {
     num_numbers++;
     
     int *val_array = calloc(num_numbers, sizeof(int));
+
     cursor = lines[i];
     for (size_t num=0; num<num_numbers; num++) {
-      int sign = 1;
       advance_past_chars(&cursor, " ");
-      if (*cursor == '-') {
-        sign = -1;
-        cursor++;
-      }
-      val_array[num] = sign * (int)get_next_val_from_string(&cursor);
+      val_array[num] = get_next_int_from_string(&cursor);
     }
 
     int next = get_next_val_in_sequence(val_array, num_numbers);

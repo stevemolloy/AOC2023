@@ -171,6 +171,15 @@ size_t get_next_val_from_string(char **string) {
   return result;
 }
 
+int get_next_int_from_string(char **string) {
+  int sign = 1;
+  if (**string == '-') {
+    sign = -1;
+    (*string)++;
+  }
+  return sign * (int)get_next_val_from_string(string);
+}
+
 size_t count_digits(size_t val) {
   size_t cnt_digits = 0;
   while (val > 0) {
