@@ -34,12 +34,14 @@ int get_first_val_in_sequence(int *val_array, size_t N) {
   return val_array[0] - result;
 }
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single argument -- the path to the file to be analysed\n");
+    return 1;
+  }
   char *buffer;
   char **lines;
-  size_t num_lines = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_lines = read_entire_file_to_lines(argv[1], &buffer, &lines);
 
   int total_part1 = 0;
   int total_part2 = 0;
