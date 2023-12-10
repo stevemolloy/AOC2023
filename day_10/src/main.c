@@ -1,12 +1,13 @@
-#include "aoc_lib.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "aoc_lib.h"
+
 typedef enum {
-  STATIC,
+  STATIC = 0,
   FROM_SOUTH,
   FROM_NORTH,
   FROM_WEST,
@@ -17,6 +18,26 @@ typedef struct {
   size_t x, y;
   LastMove lm;
 } Pos;
+
+typedef struct {
+  size_t cap;
+  size_t length;
+  Pos *positions;
+} PosArray;
+
+void add_to_posarray(PosArray *pa, Pos p) {
+  if (pa->length == pa->cap) {
+    pa->positions = realloc(pa->positions, 2*pa->cap*sizeof(Pos));
+    pa->cap *= 2;
+  }
+  pa->positions[pa->length++] = p;
+}
+
+void free_posarray(PosArray *pa) {
+  free(pa->positions);
+  pa->cap = 0;
+  pa->length = 0;
+}
 
 char get_char_at_pos(Pos p, char **lines) {
   return lines[p.y][p.x];
@@ -159,19 +180,25 @@ int main(void) {
   size_t grid_width = read_entire_file_to_lines(file_path, &buffer, &lines);
   size_t grid_height = strlen(lines[0]);
 
-  printf("\n");
-  printf("Grid:\n");
+  // printf("\n");
+  // printf("Grid:\n");
   Pos loc = {0};
   for (size_t j=0; j<grid_height; j++) {
     for (size_t i=0; i<grid_width; i++) {
       loc.x = i;
       loc.y = j;
-      putc(get_char_at_pos(loc, lines), stdout);
+      // putc(get_char_at_pos(loc, lines), stdout);
     }
-    putc('\n', stdout);
+    // putc('\n', stdout);
   }
 
-  printf("\n===================\n\n");
+  // printf("\n===================\n\n");
+
+  PosArray loop = {
+    .cap = 4096,
+    .length = 0,
+    .positions = calloc(4096, sizeof(Pos)),
+  };
 
   for (size_t j=0; j<grid_height; j++) {
     for (size_t i=0; i<grid_width; i++) {
@@ -183,21 +210,160 @@ int main(void) {
     }
   }
 
+  add_to_posarray(&loop, loc);
+
   size_t steps = 0;
-  printf("Starting loc = %zu, %zu\n", loc.x, loc.y);
+  // printf("Starting loc = %zu, %zu\n", loc.x, loc.y);
   find_first_step(&loc, lines, grid_height, grid_width);
+  add_to_posarray(&loop, loc);
   steps++;
-  printf("New loc      = %zu, %zu\n", loc.x, loc.y);
+  printf("New loc        = %zu, %zu\n", loc.x, loc.y);
+  printf("Character here = %c\n", lines[loc.y][loc.x]);
   while (take_next_step(&loc, lines, grid_height, grid_width) > 0) {
+    add_to_posarray(&loop, loc);
     steps++;
     if (get_char_at_pos(loc, lines) == 'S') {
       printf("Completed the loop in %zu steps!!\n", steps);
       break;
     }
-    printf("New loc      = %zu, %zu\n", loc.x, loc.y);
+    // printf("New loc      = %zu, %zu\n", loc.x, loc.y);
   }
 
   printf("Answer to part 1 = %zu\n", steps/2);
+
+  char *new_grid = calloc(grid_height*grid_width, sizeof(char));
+  memset(new_grid, '.', grid_width*grid_height);
+
+  for (size_t i=0; i<loop.length; i++) {
+    size_t x = loop.positions[i].x;
+    size_t y = loop.positions[i].y;
+    new_grid[y*grid_width + x] = lines[y][x];
+  }
+
+  for (size_t i=0; i<loop.length; i++) {
+    size_t x = loop.positions[i].x;
+    size_t y = loop.positions[i].y;
+    char c = new_grid[y*grid_width + x];
+    if (c == '|' && loop.positions[i].lm == FROM_SOUTH && x!=0             && new_grid[y*grid_width + x-1]=='.') {
+      new_grid[y*grid_width + x-1] = '*';
+    }
+    if (c == 'F' && loop.positions[i].lm == FROM_SOUTH && x!=0             && new_grid[y*grid_width + x-1]=='.') {
+      new_grid[y*grid_width + x-1] = '*';
+    }
+    if (c == '7' && loop.positions[i].lm == FROM_SOUTH && x!=0             && new_grid[y*grid_width + x-1]=='.') {
+      new_grid[y*grid_width + x-1] = '*';
+    }
+    if (c == 'J' && loop.positions[i].lm == FROM_WEST  && x!=0             && new_grid[y*grid_width + x-1]=='.') {
+      new_grid[y*grid_width + x-1] = '*';
+    }
+    if (c == 'L' && loop.positions[i].lm == FROM_EAST  && x!=0             && new_grid[y*grid_width + x-1]=='.') {
+      new_grid[y*grid_width + x-1] = '*';
+    }
+    if (c == '|' && loop.positions[i].lm == FROM_NORTH && x!=grid_width-1  && new_grid[y*grid_width + x+1]=='.') {
+      new_grid[y*grid_width + x+1] = '*';
+    }
+    if (c == 'F' && loop.positions[i].lm == FROM_EAST  && x!=grid_width-1  && new_grid[y*grid_width + x+1]=='.') {
+      new_grid[y*grid_width + x+1] = '*';
+    }
+    if (c == '7' && loop.positions[i].lm == FROM_WEST  && x!=grid_width-1  && new_grid[y*grid_width + x+1]=='.') {
+      new_grid[y*grid_width + x+1] = '*';
+    }
+    if (c == 'J' && loop.positions[i].lm == FROM_NORTH && x!=grid_width-1  && new_grid[y*grid_width + x+1]=='.') {
+      new_grid[y*grid_width + x+1] = '*';
+    }
+    if (c == 'L' && loop.positions[i].lm == FROM_NORTH && x!=grid_width-1  && new_grid[y*grid_width + x+1]=='.') {
+      new_grid[y*grid_width + x+1] = '*';
+    }
+    if (c == '-' && loop.positions[i].lm == FROM_EAST  && y!=grid_height-1 && new_grid[(y+1)*grid_width + x]=='.') {
+      new_grid[(y+1)*grid_width + x] = '*';
+    }
+    if (c == '-' && loop.positions[i].lm == FROM_WEST  && y!=0             && new_grid[(y-1)*grid_width + x]=='.') {
+      new_grid[(y-1)*grid_width + x] = '*';
+    }
+  }
+
+  for (size_t y=0; y<grid_height; y++) {
+    for (size_t x=0; x<grid_width; x++) {
+      if (new_grid[y*grid_width + x] == '*') {
+        if (new_grid[(y+1)*grid_width + x] == '.') new_grid[(y+1)*grid_width + x] = '*';
+        if (new_grid[(y-1)*grid_width + x] == '.') new_grid[(y-1)*grid_width + x] = '*';
+        if (new_grid[y*grid_width + x+1] == '.') new_grid[y*grid_width + x+1] = '*';
+        if (new_grid[y*grid_width + x-1] == '.') new_grid[y*grid_width + x-1] = '*';
+      }
+    }
+  }
+
+  for (size_t y=0; y<grid_height; y++) {
+    for (size_t x=0; x<grid_width; x++) {
+      if (new_grid[y*grid_width + x] == '*') {
+        if (new_grid[(y+1)*grid_width + x] == '.') new_grid[(y+1)*grid_width + x] = '*';
+        if (new_grid[(y-1)*grid_width + x] == '.') new_grid[(y-1)*grid_width + x] = '*';
+        if (new_grid[y*grid_width + x+1] == '.') new_grid[y*grid_width + x+1] = '*';
+        if (new_grid[y*grid_width + x-1] == '.') new_grid[y*grid_width + x-1] = '*';
+      }
+    }
+  }
+
+  for (int y=0; y<(int)grid_height; y++) {
+    for (int x=0; x<(int)grid_width; x++) {
+      char ng = new_grid[y*grid_width + x];
+      if (ng == '.') new_grid[y*grid_width + x] = ' ';
+      if (ng=='|' || ng=='-' || ng=='J' || ng=='L' || ng=='F' || ng == '7' || ng == 'S') break;
+    }
+  }
+
+  for (int y=0; y<(int)grid_height; y++) {
+    for (int x=(int)grid_width-1; x>0; x--) {
+      char ng = new_grid[y*grid_width + x];
+      if (new_grid[y*grid_width + x] == '.') new_grid[y*grid_width + x] = ' ';
+      if (ng=='|' || ng=='-' || ng=='J' || ng=='L' || ng=='F' || ng == '7' || ng == 'S') break;
+    }
+  }
+
+  for (int x=0; x<(int)grid_width; x++) {
+    for (int y=0; y<(int)grid_height; y++) {
+      char ng = new_grid[y*grid_width + x];
+      if (new_grid[y*grid_width + x] == '.') new_grid[y*grid_width + x] = ' ';
+      if (ng=='|' || ng=='-' || ng=='J' || ng=='L' || ng=='F' || ng == '7' || ng == 'S') break;
+    }
+  }
+
+  for (int x=0; x<(int)grid_width; x++) {
+    for (int y=(int)grid_height-1; y>=0; y--) {
+      char ng = new_grid[y*grid_width + x];
+      if (new_grid[y*grid_width + x] == '.') new_grid[y*grid_width + x] = ' ';
+      if (ng=='|' || ng=='-' || ng=='J' || ng=='L' || ng=='F' || ng == '7' || ng == 'S') break;
+    }
+  }
+
+  size_t counted_dots = 0;
+  for (size_t y=0; y<grid_height; y++) {
+    for (size_t x=0; x<grid_width; x++) {
+      if (new_grid[y*grid_width + x] == '*') {
+        printf("*");
+        counted_dots++;
+      }
+      else if (new_grid[y*grid_width + x] == '|') printf("║");
+      else if (new_grid[y*grid_width + x] == '-') printf("═");
+      else if (new_grid[y*grid_width + x] == 'J') printf("╝");
+      else if (new_grid[y*grid_width + x] == 'L') printf("╚");
+      else if (new_grid[y*grid_width + x] == 'F') printf("╔");
+      else if (new_grid[y*grid_width + x] == '7') printf("╗");
+      else if (new_grid[y*grid_width + x] == 'S') printf("║");
+      else if (new_grid[y*grid_width + x] == '.') printf(".");
+      else if (new_grid[y*grid_width + x] == ' ') printf(" ");
+      else {
+        printf("Unknown char: %c\n", new_grid[y*grid_width + x]);
+        assert(0 && "Not sure what to do with this character\n");
+      }
+    }
+    putc('\n', stdout);
+  }
+
+  printf("Answer to part 2 = %zu\n", counted_dots);
+
+  free(buffer);
+  free(lines);
 
   return 0;
 }
