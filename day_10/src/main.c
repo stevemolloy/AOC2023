@@ -180,26 +180,13 @@ int main(void) {
   size_t grid_width = read_entire_file_to_lines(file_path, &buffer, &lines);
   size_t grid_height = strlen(lines[0]);
 
-  // printf("\n");
-  // printf("Grid:\n");
-  Pos loc = {0};
-  for (size_t j=0; j<grid_height; j++) {
-    for (size_t i=0; i<grid_width; i++) {
-      loc.x = i;
-      loc.y = j;
-      // putc(get_char_at_pos(loc, lines), stdout);
-    }
-    // putc('\n', stdout);
-  }
-
-  // printf("\n===================\n\n");
-
   PosArray loop = {
     .cap = 4096,
     .length = 0,
     .positions = calloc(4096, sizeof(Pos)),
   };
 
+  Pos loc = {0};
   for (size_t j=0; j<grid_height; j++) {
     for (size_t i=0; i<grid_width; i++) {
       if (lines[j][i] == 'S') {
@@ -297,6 +284,7 @@ int main(void) {
     }
   }
 
+#ifdef DEBUG
   for (int y=0; y<(int)grid_height; y++) {
     for (int x=0; x<(int)grid_width; x++) {
       char ng = new_grid[y*grid_width + x];
@@ -328,6 +316,7 @@ int main(void) {
       if (ng=='|' || ng=='-' || ng=='J' || ng=='L' || ng=='F' || ng == '7' || ng == 'S') break;
     }
   }
+#endif // DEBUG
 
   size_t counted_dots = 0;
   for (size_t y=0; y<grid_height; y++) {
@@ -336,7 +325,7 @@ int main(void) {
     }
   }
 
-#if DEBUG
+#ifdef DEBUG
   for (size_t y=0; y<grid_height; y++) {
     for (size_t x=0; x<grid_width; x++) {
       if (new_grid[y*grid_width + x] == '*') {
@@ -359,7 +348,7 @@ int main(void) {
     }
     putc('\n', stdout);
   }
-#endif
+#endif // DEBUG
 
   printf("Answer to part 2 = %zu\n", counted_dots);
 
