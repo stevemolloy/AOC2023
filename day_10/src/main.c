@@ -213,20 +213,13 @@ int main(void) {
   add_to_posarray(&loop, loc);
 
   size_t steps = 0;
-  // printf("Starting loc = %zu, %zu\n", loc.x, loc.y);
   find_first_step(&loc, lines, grid_height, grid_width);
   add_to_posarray(&loop, loc);
   steps++;
-  printf("New loc        = %zu, %zu\n", loc.x, loc.y);
-  printf("Character here = %c\n", lines[loc.y][loc.x]);
   while (take_next_step(&loc, lines, grid_height, grid_width) > 0) {
     add_to_posarray(&loop, loc);
     steps++;
-    if (get_char_at_pos(loc, lines) == 'S') {
-      printf("Completed the loop in %zu steps!!\n", steps);
-      break;
-    }
-    // printf("New loc      = %zu, %zu\n", loc.x, loc.y);
+    if (get_char_at_pos(loc, lines) == 'S') break;
   }
 
   printf("Answer to part 1 = %zu\n", steps/2);
@@ -339,6 +332,13 @@ int main(void) {
   size_t counted_dots = 0;
   for (size_t y=0; y<grid_height; y++) {
     for (size_t x=0; x<grid_width; x++) {
+      if (new_grid[y*grid_width + x] == '*') counted_dots++;
+    }
+  }
+
+#if DEBUG
+  for (size_t y=0; y<grid_height; y++) {
+    for (size_t x=0; x<grid_width; x++) {
       if (new_grid[y*grid_width + x] == '*') {
         printf("*");
         counted_dots++;
@@ -359,9 +359,12 @@ int main(void) {
     }
     putc('\n', stdout);
   }
+#endif
 
   printf("Answer to part 2 = %zu\n", counted_dots);
 
+  free_posarray(&loop);
+  free(new_grid);
   free(buffer);
   free(lines);
 
