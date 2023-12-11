@@ -39,10 +39,6 @@ int main(void) {
   size_t num_rows = read_entire_file_to_lines(file_path, &buffer, &lines);
   size_t num_cols = strlen(lines[0]);
 
-  // for (size_t i=0; i<num_rows; i++) {
-  //   printf("line %03zu: %s\n", i, lines[i]);
-  // }
-
   size_t num_galaxies = 0;
   for (size_t j=0; j<num_rows; j++) {
     for (size_t i=0; i<num_cols; i++) {
@@ -69,10 +65,6 @@ int main(void) {
     if (!is_symbol_in_row(lines, j, '#')) x++;
   }
 
-  // for (size_t i=0; i<num_galaxies; i++) {
-  //   printf("Galaxy %03zu: %zu,%zu\n", i, galaxy_pos_list[i].x, galaxy_pos_list[i].y);
-  // }
-
   size_t *distances = calloc(num_galaxies*(num_galaxies+1)/2, sizeof(size_t));
   galaxy_index = 0;
   for (size_t i=0; i<num_galaxies; i++) {
@@ -84,7 +76,6 @@ int main(void) {
   size_t sum = 0;
   for (size_t i=0; i<num_galaxies*(num_galaxies+1)/2; i++) {
     sum += distances[i];
-    // printf("Distance = %zu\n", distances[i]);
   }
 
   printf("Answer to part 1 = %zu\n", sum);
@@ -114,11 +105,12 @@ int main(void) {
   sum = 0;
   for (size_t i=0; i<num_galaxies*(num_galaxies+1)/2; i++) {
     sum += distances[i];
-    // printf("Distance = %zu\n", distances[i]);
   }
 
   printf("Answer to part 1 = %zu\n", sum);
 
+  free(galaxy_pos_list);
+  free(distances);
   free(buffer);
   free(lines);
 
