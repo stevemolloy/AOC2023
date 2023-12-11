@@ -6,6 +6,8 @@
 
 #include "aoc_lib.h"
 
+#define DEBUG
+
 typedef enum {
   STATIC = 0,
   FROM_SOUTH,
@@ -339,7 +341,7 @@ int main(void) {
       else if (new_grid[y*grid_width + x] == 'F') printf("╔");
       else if (new_grid[y*grid_width + x] == '7') printf("╗");
       else if (new_grid[y*grid_width + x] == 'S') printf("║");
-      else if (new_grid[y*grid_width + x] == '.') printf(".");
+      else if (new_grid[y*grid_width + x] == '.') printf(" ");
       else if (new_grid[y*grid_width + x] == ' ') printf(" ");
       else {
         printf("Unknown char: %c\n", new_grid[y*grid_width + x]);
