@@ -5,32 +5,6 @@
 
 #include "aoc_lib.h"
 
-typedef struct {
-  size_t x,y;
-} Pos;
-
-size_t dist_between_pos(Pos a, Pos b) {
-  int x_dist = a.x - b.x;
-  if (x_dist < 0) x_dist *= -1;
-  int y_dist = a.y - b.y;
-  if (y_dist < 0) y_dist *= -1;
-  return x_dist + y_dist;
-}
-
-bool is_symbol_in_row(char **lines, size_t row_num, char c) {
-  for (size_t i=0; i<strlen(lines[row_num]); i++) {
-    if (lines[row_num][i] == c) return true;
-  }
-  return false;
-}
-
-bool is_symbol_in_col(char **lines, size_t num_lines, size_t col_num, char c) {
-  for (size_t i=0; i<num_lines; i++) {
-    if (lines[i][col_num] == c) return true;
-  }
-  return false;
-}
-
 int main(void) {
   // char *file_path = "./test_input.txt";
   char *file_path = "./real_input.txt";
@@ -65,19 +39,12 @@ int main(void) {
     if (!is_symbol_in_row(lines, j, '#')) x++;
   }
 
-  size_t *distances = calloc(num_galaxies*(num_galaxies+1)/2, sizeof(size_t));
-  galaxy_index = 0;
-  for (size_t i=0; i<num_galaxies; i++) {
-    for (size_t j=i; j<num_galaxies; j++) {
-      distances[galaxy_index++] = dist_between_pos(galaxy_pos_list[i], galaxy_pos_list[j]);
-    }
-  }
+  size_t *distances = calloc(triangular_number(num_galaxies), sizeof(size_t));
 
-  size_t sum = 0;
-  for (size_t i=0; i<num_galaxies*(num_galaxies+1)/2; i++) {
-    sum += distances[i];
-  }
+  get_all_distances(galaxy_pos_list, num_galaxies, distances);
 
+  size_t sum;
+  sum = sum_vector(distances, triangular_number(num_galaxies));
   printf("Answer to part 1 = %zu\n", sum);
 
   x=0, y=0;
@@ -95,18 +62,9 @@ int main(void) {
     if (!is_symbol_in_row(lines, j, '#')) x += 1000*1000 - 1;
   }
 
-  galaxy_index = 0;
-  for (size_t i=0; i<num_galaxies; i++) {
-    for (size_t j=i; j<num_galaxies; j++) {
-      distances[galaxy_index++] = dist_between_pos(galaxy_pos_list[i], galaxy_pos_list[j]);
-    }
-  }
+  get_all_distances(galaxy_pos_list, num_galaxies, distances);
 
-  sum = 0;
-  for (size_t i=0; i<num_galaxies*(num_galaxies+1)/2; i++) {
-    sum += distances[i];
-  }
-
+  sum = sum_vector(distances, triangular_number(num_galaxies));
   printf("Answer to part 1 = %zu\n", sum);
 
   free(galaxy_pos_list);

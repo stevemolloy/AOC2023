@@ -195,3 +195,38 @@ size_t ten_to_the_power_of(size_t exp) {
     return factor;
 }
 
+size_t triangular_number(size_t n) {
+  return n*(n+1)/2;
+}
+
+size_t dist_between_pos(Pos a, Pos b) {
+  int x_dist = a.x - b.x;
+  if (x_dist < 0) x_dist *= -1;
+  int y_dist = a.y - b.y;
+  if (y_dist < 0) y_dist *= -1;
+  return x_dist + y_dist;
+}
+
+void get_all_distances(Pos *pos_list, size_t N, size_t *distances) {
+  size_t index = 0;
+  for (size_t i=0; i<N; i++) {
+    for (size_t j=i; j<N; j++) {
+      distances[index++] = dist_between_pos(pos_list[i], pos_list[j]);
+    }
+  }
+}
+
+bool is_symbol_in_row(char **lines, size_t row_num, char c) {
+  for (size_t i=0; i<strlen(lines[row_num]); i++) {
+    if (lines[row_num][i] == c) return true;
+  }
+  return false;
+}
+
+bool is_symbol_in_col(char **lines, size_t num_lines, size_t col_num, char c) {
+  for (size_t i=0; i<num_lines; i++) {
+    if (lines[i][col_num] == c) return true;
+  }
+  return false;
+}
+

@@ -2,6 +2,11 @@
 #define _AOC_LIB_H
 
 #include <stdio.h>
+#include <stdbool.h>
+
+typedef struct {
+  size_t x,y;
+} Pos;
 
 int get_value_from_str(char **str, int *first, int*last);
 
@@ -34,6 +39,16 @@ int get_next_int_from_string(char **string);
 size_t count_digits(size_t val);
 
 size_t ten_to_the_power_of(size_t exp);
+
+size_t triangular_number(size_t n);
+
+size_t dist_between_pos(Pos a, Pos b);
+
+void get_all_distances(Pos *pos_list, size_t N, size_t *distances);
+
+bool is_symbol_in_row(char **lines, size_t row_num, char c);
+
+bool is_symbol_in_col(char **lines, size_t num_lines, size_t col_num, char c);
 
 #endif /* ifndef _AOC_LIB_H */
 
