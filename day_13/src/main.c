@@ -74,8 +74,6 @@ int main(void) {
   size_t ans_1 = 0;
   size_t ans_2 = 0;
   for (size_t gridN=0; gridN<num_grids; gridN++) {
-    bool found_a_mirror = false;
-    bool found_a_mirror2 = false;
     int start = grid_starts[gridN];
     int end   = grid_ends[gridN];
 
@@ -83,33 +81,13 @@ int main(void) {
 
     for (int h_loc=1; h_loc<=end-start-1; h_loc++) {
       int err_count = horizonal_reflection_error_count(lines, start, end, h_loc);
-      if (err_count == 0) {
-        found_a_mirror = true;
-        ans_1 += 100 * h_loc;
-      }
-      if (err_count == 1) {
-        found_a_mirror2 = true;
-        ans_2 += 100 * h_loc;
-      }
+      if (err_count == 0) ans_1 += 100 * h_loc;
+      if (err_count == 1) ans_2 += 100 * h_loc;
     }
     for (int v_loc=1; v_loc<=line_length-1; v_loc++) {
       int err_count = vertical_reflection_error_count(lines, start, end, v_loc);
-      if (err_count == 0) {
-        if (found_a_mirror) printf("Found a second reflection for grid %zu!\n", gridN);
-        found_a_mirror = true;
-        ans_1 += v_loc;
-      }
-      if (err_count == 1) {
-        if (found_a_mirror2) printf("Found a second reflection for grid %zu!\n", gridN);
-        found_a_mirror2 = true;
-        ans_2 += v_loc;
-      }
-    }
-    if (!found_a_mirror) {
-      printf("Found no mirror for grid %zu\n", gridN);
-      for (int i=start; i<end; i++) {
-        printf("%s\n", lines[i]);
-      }
+      if (err_count == 0) ans_1 += v_loc;
+      if (err_count == 1) ans_2 += v_loc;
     }
   }
 
