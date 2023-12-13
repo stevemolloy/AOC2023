@@ -5,21 +5,6 @@
 
 #include "aoc_lib.h"
 
-bool compare_two_lines(char *l1, char *l2) {
-  assert(strlen(l1) == strlen(l2) && "Line lengths do not match");
-  for (size_t i=0; i<strlen(l1); i++) {
-    if (l1[i] != l2[i]) return false;
-  }
-  return true;
-}
-
-bool compare_two_columns(char **lines, size_t start_row, size_t end_row, size_t col1, size_t col2) {
-  for (size_t i=start_row; i<end_row; i++) {
-    if (lines[i][col1] != lines[i][col2]) return false;
-  }
-  return true;
-}
-
 int horizonal_reflection_error_count(char **lines, int start, int end, int mirror_loc) {
   int reflection_start = start + mirror_loc;
   int line_length = strlen(lines[reflection_start]);
@@ -86,8 +71,6 @@ int main(void) {
   }
   grid_ends[ind] = num_lines;
 
-  printf("I found %zu grids\n", num_grids);
-
   size_t ans_1 = 0;
   size_t ans_2 = 0;
   for (size_t gridN=0; gridN<num_grids; gridN++) {
@@ -100,7 +83,6 @@ int main(void) {
 
     for (int h_loc=1; h_loc<=end-start-1; h_loc++) {
       int err_count = horizonal_reflection_error_count(lines, start, end, h_loc);
-      printf("err_count = %d, h_loc = %d\n", err_count, h_loc);
       if (err_count == 0) {
         found_a_mirror = true;
         ans_1 += 100 * h_loc;
@@ -112,7 +94,6 @@ int main(void) {
     }
     for (int v_loc=1; v_loc<=line_length-1; v_loc++) {
       int err_count = vertical_reflection_error_count(lines, start, end, v_loc);
-      printf("err_count = %d, v_loc = %d\n", err_count, v_loc);
       if (err_count == 0) {
         if (found_a_mirror) printf("Found a second reflection for grid %zu!\n", gridN);
         found_a_mirror = true;
@@ -130,11 +111,15 @@ int main(void) {
         printf("%s\n", lines[i]);
       }
     }
-    printf("\n");
   }
 
-  printf("Answer to part 1 = %zu (Should be 29846)\n", ans_1);
-  printf("Answer to part 2 = %zu (24615 is wrong)\n", ans_2);
+  printf("Answer to part 1 = %zu\n", ans_1);
+  printf("Answer to part 2 = %zu\n", ans_2);
+
+  free(grid_starts);
+  free(grid_ends);
+  free(buffer);
+  free(lines);
 
   return 0;
 }
