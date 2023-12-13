@@ -20,6 +20,149 @@ bool compare_two_columns(char **lines, size_t start_row, size_t end_row, size_t 
   return true;
 }
 
+int get_answer_for_grid(char **lines, int start, int end, int old_result) {
+  int result = 0;
+  size_t lines_before;
+
+  bool found_a_match = false;
+
+  // Search to find any lines that match the first line
+  char *line_to_compare_with = lines[start];
+  int match = start + 1;
+  if (!found_a_match) {
+    for ( ; match<end; match++) {
+      if (compare_two_lines(line_to_compare_with, lines[match])) {
+        found_a_match = true;
+        int s1 = start + 1;
+        int s2 = match - 1;
+        while (s1 < s2) {
+          if (!compare_two_lines(lines[s1], lines[s2])) {
+            found_a_match = false;
+            break;
+          }
+          s1++;
+          s2--;
+        }
+        if (found_a_match) {
+          // printf("Found a horizontal mirror for grid %zu at %d\n", gridN, match);
+          lines_before = (match - start) / 2 + 1;
+          // printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
+          result = 100 * lines_before;
+          if (result != old_result) {
+            break;
+          } else {
+            found_a_match = false;
+          }
+        }
+      }
+    }
+  }
+
+  // Search to find any lines that match the last line
+  line_to_compare_with = lines[end-1];
+  match -= 2;
+  if (!found_a_match) {
+    for ( ; match>=start; match--) {
+      if (compare_two_lines(line_to_compare_with, lines[match])) {
+        found_a_match = true;
+        int s1 = match + 1;
+        int s2 = end - 1 - 1;
+        while (s1 < s2) {
+          if (!compare_two_lines(lines[s1], lines[s2])) {
+            found_a_match = false;
+            break;
+          }
+          s1++;
+          s2--;
+        }
+        if (found_a_match) {
+          // printf("Found a horizontal mirror for grid %zu at %d\n", gridN, match);
+          lines_before = 1 + match + ((end-1) - match)/2 - start;
+          // printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
+          result = 100 * lines_before;
+          if (result != old_result) {
+            break;
+          } else {
+            found_a_match = false;
+          }
+        }
+      }
+    }
+  }
+
+  // Search to find any columns that match the first one
+  size_t col_to_compare_with = 0;
+  match = 1;
+  if (!found_a_match) {
+    for ( ; match<(int)strlen(lines[start]); match++) {
+      if (compare_two_columns(lines, start, end, col_to_compare_with, match)) {
+        found_a_match = true;
+        int s1 = col_to_compare_with + 1;
+        int s2 = match - 1;
+        while (s1 < s2) {
+          if (!compare_two_columns(lines, start, end, s1, s2)) {
+            found_a_match = false;
+            break;
+          }
+          s1++;
+          s2--;
+        }
+        if (found_a_match) {
+          // printf("Found a vertical mirror for grid %zu at %d\n", gridN, match);
+          lines_before = (match + 1) / 2;
+          // printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
+          result = lines_before;
+          if (result != old_result) {
+            break;
+          } else {
+            found_a_match = false;
+          }
+        }
+      }
+    }
+  }
+
+  // Search to find any columns that match the last one
+  col_to_compare_with = strlen(lines[start]) - 1;
+  match -= 2;
+  if (!found_a_match) {
+    for ( ; match>=0; match--) {
+      if (compare_two_columns(lines, start, end, col_to_compare_with, match)) {
+        found_a_match = true;
+        int s1 = match + 1;
+        int s2 = col_to_compare_with - 1;
+        while (s1 < s2) {
+          if (!compare_two_columns(lines, start, end, s1, s2)) {
+            found_a_match = false;
+            break;
+          }
+          s1++;
+          s2--;
+        }
+        if (found_a_match) {
+          // printf("Found a vertical mirror for grid %zu at %d\n", gridN, match);
+          // printf("\tFindings: start = %d, end = %d, col_to_compare_with = %zu, match = %d\n", start, end, col_to_compare_with, match);
+          lines_before = match + 1 + (col_to_compare_with - match)/2;
+          // printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
+          result = lines_before;
+          if (result != old_result) {
+            break;
+          } else {
+            found_a_match = false;
+          }
+        }
+      }
+    }
+  }
+
+  if (!found_a_match) {
+    // printf("DID NOT FIND A MATCH FOR GRID %zu\n", gridN);
+    result = -1;
+  }
+
+  return result;
+}
+
 int main(void) {
   // char *file_path = "./my_test_input.txt";
   // char *file_path = "./test_input.txt";
@@ -49,133 +192,54 @@ int main(void) {
   printf("I found %zu grids\n", num_grids);
 
   size_t ans_1 = 0;
+  size_t ans_2 = 0;
   for (size_t gridN=0; gridN<num_grids; gridN++) {
     int start = grid_starts[gridN];
     int end   = grid_ends[gridN];
 
-    size_t lines_before;
+    // for (int N=start; N<end; N++) printf("%s\n", lines[N]);
+    // printf("\n");
 
-    bool found_a_match = false;
+    int dirty_answer = get_answer_for_grid(lines, start, end, 0);
+    ans_1 += dirty_answer;
 
-    // Search to find any lines that match the first line
-    char *line_to_compare_with = lines[start];
-    int match = start + 1;
-    if (!found_a_match) {
-      for ( ; match<end; match++) {
-        if (compare_two_lines(line_to_compare_with, lines[match])) {
-          found_a_match = true;
-          int s1 = start + 1;
-          int s2 = match - 1;
-          while (s1 < s2) {
-            if (!compare_two_lines(lines[s1], lines[s2])) {
-              found_a_match = false;
-              break;
-            }
-            s1++;
-            s2--;
-          }
-          if (found_a_match) {
-            printf("Found a horizontal mirror for grid %zu at %d\n", gridN, match);
-            lines_before = (match - start) / 2 + 1;
-            printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
-            ans_1 += 100 * lines_before;
-            break;
-          }
+    int clean_answer = dirty_answer;
+
+    bool found_smudge = false;
+
+    for (int line=start; line<end; line++) {
+      for (size_t i=0; i<strlen(lines[line]); i++) {
+        // printf("\n\n%s\n", lines[line]);
+        if (lines[line][i] == '.') {
+          lines[line][i] = '#';
+        } else if (lines[line][i] == '#') {
+          lines[line][i] = '.';
         }
+        // printf("%s\n", lines[line]);
+        clean_answer = get_answer_for_grid(lines, start, end, dirty_answer);
+        if (clean_answer > 0 && clean_answer != dirty_answer) {
+          found_smudge = true;
+          break;
+        }
+        if (lines[line][i] == '.') {
+          lines[line][i] = '#';
+        } else if (lines[line][i] == '#') {
+          lines[line][i] = '.';
+        }
+      }
+      if (found_smudge) {
+        break;
       }
     }
 
-    // Search to find any lines that match the last line
-    line_to_compare_with = lines[end-1];
-    match -= 2;
-    if (!found_a_match) {
-      for ( ; match>=start; match--) {
-        if (compare_two_lines(line_to_compare_with, lines[match])) {
-          found_a_match = true;
-          int s1 = match + 1;
-          int s2 = end - 1 - 1;
-          while (s1 < s2) {
-            if (!compare_two_lines(lines[s1], lines[s2])) {
-              found_a_match = false;
-              break;
-            }
-            s1++;
-            s2--;
-          }
-          if (found_a_match) {
-            printf("Found a horizontal mirror for grid %zu at %d\n", gridN, match);
-            lines_before = 1 + match + ((end-1) - match)/2 - start;
-            printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
-            ans_1 += 100 * lines_before;
-            break;
-          }
-        }
-      }
-    }
+    // for (int N=start; N<end; N++) printf("%s\n", lines[N]);
+    // printf("\n");
 
-    // Search to find any columns that match the first one
-    size_t col_to_compare_with = 0;
-    match = 1;
-    if (!found_a_match) {
-      for ( ; match<(int)strlen(lines[start]); match++) {
-        if (compare_two_columns(lines, start, end, col_to_compare_with, match)) {
-          found_a_match = true;
-          int s1 = col_to_compare_with + 1;
-          int s2 = match - 1;
-          while (s1 < s2) {
-            if (!compare_two_columns(lines, start, end, s1, s2)) {
-              found_a_match = false;
-              break;
-            }
-            s1++;
-            s2--;
-          }
-          if (found_a_match) {
-            printf("Found a vertical mirror for grid %zu at %d\n", gridN, match);
-            lines_before = (match + 1) / 2;
-            printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
-            ans_1 += lines_before;
-            break;
-          }
-        }
-      }
-    }
-
-    // Search to find any columns that match the last one
-    col_to_compare_with = strlen(lines[start]) - 1;
-    match -= 2;
-    if (!found_a_match) {
-      for ( ; match>=0; match--) {
-        if (compare_two_columns(lines, start, end, col_to_compare_with, match)) {
-          found_a_match = true;
-          int s1 = match + 1;
-          int s2 = col_to_compare_with - 1;
-          while (s1 < s2) {
-            if (!compare_two_columns(lines, start, end, s1, s2)) {
-              found_a_match = false;
-              break;
-            }
-            s1++;
-            s2--;
-          }
-          if (found_a_match) {
-            printf("Found a vertical mirror for grid %zu at %d\n", gridN, match);
-            // printf("\tFindings: start = %d, end = %d, col_to_compare_with = %zu, match = %d\n", start, end, col_to_compare_with, match);
-            lines_before = match + 1 + (col_to_compare_with - match)/2;
-            printf("\tAns for grid %zu = %zu\n", gridN, lines_before);
-            ans_1 += lines_before;
-            break;
-          }
-        }
-      }
-    }
-
-    if (!found_a_match) {
-      printf("DID NOT FIND A MATCH FOR GRID %zu\n", gridN);
-    }
+    ans_2 += clean_answer;
   }
 
-  printf("Answer to part 1 = %zu\n", ans_1);
+  printf("Answer to part 1 = %zu (Should be 29846)\n", ans_1);
+  printf("Answer to part 2 = %zu (24615 is wrong)\n", ans_2);
 
   return 0;
 }
