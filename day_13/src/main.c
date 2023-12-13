@@ -41,13 +41,13 @@ int horizonal_reflection_error_count(char **lines, int start, int end, int mirro
 }
 
 int vertical_reflection_error_count(char **lines, int start, int end, int mirror_loc) {
-  int reflection_start = mirror_loc;
-  int line_length = strlen(lines[reflection_start]);
+  int reflection_start = mirror_loc - 1;
+  int line_length = strlen(lines[start]);
 
   int error_count = 0;
 
-  int s1 = reflection_start - 1;
-  int s2 = reflection_start;
+  int s1 = reflection_start;
+  int s2 = reflection_start + 1;
 
   while (s1>=0 && s2<line_length) {
     for (int i=start; i<end; i++) {
@@ -62,8 +62,8 @@ int vertical_reflection_error_count(char **lines, int start, int end, int mirror
 
 int main(void) {
   // char *file_path = "./my_test_input.txt";
-  char *file_path = "./test_input.txt";
-  // char *file_path = "./real_input.txt";
+  // char *file_path = "./test_input.txt";
+  char *file_path = "./real_input.txt";
   char *buffer;
   char **lines;
 
@@ -91,25 +91,33 @@ int main(void) {
   size_t ans_1 = 0;
   size_t ans_2 = 0;
   for (size_t gridN=0; gridN<num_grids; gridN++) {
+    bool found_a_mirror = false;
     int start = grid_starts[gridN];
     int end   = grid_ends[gridN];
 
     int line_length = strlen(lines[start]);
 
-    for (int v_loc=1; v_loc<line_length-2; v_loc++) {
-      int err_count = vertical_reflection_error_count(lines, start, end, v_loc);
-      printf("err_count = %d, v_loc = %d\n", err_count, v_loc);
-      if (err_count == 0) {
-        ans_1 += v_loc;
-        break;
-      }
-    }
-    for (int h_loc=1; h_loc<end-start-2; h_loc++) {
+    for (int h_loc=1; h_loc<=end-start-1; h_loc++) {
       int err_count = horizonal_reflection_error_count(lines, start, end, h_loc);
       printf("err_count = %d, h_loc = %d\n", err_count, h_loc);
       if (err_count == 0) {
+        found_a_mirror = true;
         ans_1 += 100 * h_loc;
-        break;
+      }
+    }
+    for (int v_loc=1; v_loc<=line_length-1; v_loc++) {
+      int err_count = vertical_reflection_error_count(lines, start, end, v_loc);
+      printf("err_count = %d, v_loc = %d\n", err_count, v_loc);
+      if (err_count == 0) {
+        if (found_a_mirror) printf("Found a second reflection for grid %zu!\n", gridN);
+        found_a_mirror = true;
+        ans_1 += v_loc;
+      }
+    }
+    if (!found_a_mirror) {
+      printf("Found no mirror for grid %zu\n", gridN);
+      for (int i=start; i<end; i++) {
+        printf("%s\n", lines[i]);
       }
     }
     printf("\n");
