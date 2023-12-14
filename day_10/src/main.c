@@ -19,17 +19,17 @@ typedef enum {
 typedef struct {
   size_t x, y;
   LastMove lm;
-} Pos;
+} PosEnhanced;
 
 typedef struct {
   size_t cap;
   size_t length;
-  Pos *positions;
+  PosEnhanced *positions;
 } PosArray;
 
-void add_to_posarray(PosArray *pa, Pos p) {
+void add_to_posarray(PosArray *pa, PosEnhanced p) {
   if (pa->length == pa->cap) {
-    pa->positions = realloc(pa->positions, 2*pa->cap*sizeof(Pos));
+    pa->positions = realloc(pa->positions, 2*pa->cap*sizeof(PosEnhanced));
     pa->cap *= 2;
   }
   pa->positions[pa->length++] = p;
@@ -41,13 +41,13 @@ void free_posarray(PosArray *pa) {
   pa->length = 0;
 }
 
-char get_char_at_pos(Pos p, char **lines) {
+char get_char_at_pos(PosEnhanced p, char **lines) {
   return lines[p.y][p.x];
 }
 
-int find_first_step(Pos *loc, char **lines, size_t grid_height, size_t grid_width) {
+int find_first_step(PosEnhanced *loc, char **lines, size_t grid_height, size_t grid_width) {
   if (loc->x > 0) {
-    Pos test_loc = {loc->x-1, loc->y, FROM_EAST};
+    PosEnhanced test_loc = {loc->x-1, loc->y, FROM_EAST};
     char c = get_char_at_pos(test_loc, lines);
     if (c == '-' || c == 'L' || c == 'F') {
       *loc = test_loc;
@@ -55,7 +55,7 @@ int find_first_step(Pos *loc, char **lines, size_t grid_height, size_t grid_widt
     }
   }
   if (loc->x < grid_width-1) {
-    Pos test_loc = {loc->x+1, loc->y, FROM_WEST};
+    PosEnhanced test_loc = {loc->x+1, loc->y, FROM_WEST};
     char c = get_char_at_pos(test_loc, lines);
     if (c == '-' || c == 'L' || c == 'J') {
       *loc = test_loc;
@@ -63,7 +63,7 @@ int find_first_step(Pos *loc, char **lines, size_t grid_height, size_t grid_widt
     }
   }
   if (loc->y > 0) {
-    Pos test_loc = {loc->x, loc->y-1, FROM_SOUTH};
+    PosEnhanced test_loc = {loc->x, loc->y-1, FROM_SOUTH};
     char c = get_char_at_pos(test_loc, lines);
     if (c == '|' || c == 'L' || c == 'F') {
       *loc = test_loc;
@@ -71,7 +71,7 @@ int find_first_step(Pos *loc, char **lines, size_t grid_height, size_t grid_widt
     }
   }
   if (loc->y < grid_height-1) {
-    Pos test_loc = {loc->x, loc->y+1, FROM_NORTH};
+    PosEnhanced test_loc = {loc->x, loc->y+1, FROM_NORTH};
     char c = get_char_at_pos(test_loc, lines);
     if (c == '|' || c == '7' || c == 'F') {
       *loc = test_loc;
@@ -81,7 +81,7 @@ int find_first_step(Pos *loc, char **lines, size_t grid_height, size_t grid_widt
   return -1;
 }
 
-int take_next_step(Pos *loc, char **lines, size_t grid_height, size_t grid_width) {
+int take_next_step(PosEnhanced *loc, char **lines, size_t grid_height, size_t grid_width) {
   char c = get_char_at_pos(*loc, lines);
   if (c=='.') return -1;
 
@@ -185,10 +185,10 @@ int main(void) {
   PosArray loop = {
     .cap = 4096,
     .length = 0,
-    .positions = calloc(4096, sizeof(Pos)),
+    .positions = calloc(4096, sizeof(PosEnhanced)),
   };
 
-  Pos loc = {0};
+  PosEnhanced loc = {0};
   for (size_t j=0; j<grid_height; j++) {
     for (size_t i=0; i<grid_width; i++) {
       if (lines[j][i] == 'S') {
