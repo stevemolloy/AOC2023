@@ -58,16 +58,16 @@ int main(int argc, char **argv) {
       }
     }
 
-    if (cycle_num==0) {
-      size_t total = get_load_on_north(lines, num_rows, num_cols);
-      printf("Answer to part 1 = %zu (should be 109638)\n", total);
-    }
-
     // Transpose for printing and tilting WEST
     for (size_t i=0; i<num_cols; i++) {
       for (size_t j=0; j<num_rows; j++) {
         lines[i][j] = columns[j][i];
       }
+    }
+
+    if (cycle_num==0) {
+      size_t total = get_load_on_north(lines, num_rows, num_cols);
+      printf("Answer to part 1 = %zu (should be 109638)\n", total);
     }
 
     // Tilt WEST
