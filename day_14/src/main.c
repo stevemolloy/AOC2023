@@ -20,13 +20,15 @@ size_t get_load_on_north(char **lines, size_t num_rows, size_t num_cols) {
 // This means that the answer is found after calculating 122 + 17 = 139 total cycles.
 #define NUMCYCLES 139
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single input -- the file to be analysed\n");
+    return 1;
+  }
   char *buffer;
   char **lines;
 
-  size_t num_rows = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_rows = read_entire_file_to_lines(argv[1], &buffer, &lines);
   size_t num_cols = strlen(lines[0]);
 
   char **columns = calloc(num_cols, sizeof(char*));
