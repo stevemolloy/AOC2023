@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include "aoc_lib.h"
 
+// Experimentally I found that the repeated cycle starts at 122 and is 21 steps long.
+// (1_000_000_000 - 122) % 21 = 17
+// This means that the answer is found after calculating 122 + 17 = 139 total cycles.
 #define NUMCYCLES 139
-#define DEBUG 0
 
 int main(void) {
   // char *file_path = "./test_input.txt";
@@ -15,18 +16,11 @@ int main(void) {
   char **lines;
 
   size_t num_rows = read_entire_file_to_lines(file_path, &buffer, &lines);
-  printf("Found %zu lines\n", num_rows);
   size_t num_cols = strlen(lines[0]);
 
   char **columns = calloc(num_cols, sizeof(char*));
   for (size_t i=0; i<num_cols; i++) columns[i] = calloc(num_rows+1, sizeof(char));
   
-#if DEBUG
-  printf("\n");
-  printf("Starting position\n");
-  for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
-#endif
-
   for (size_t cycle_num=0; cycle_num<NUMCYCLES; cycle_num++) {
     // Transpose for tilting NORTH
     for (size_t i=0; i<num_cols; i++) {
@@ -53,7 +47,8 @@ int main(void) {
       }
     }
 
-    // printf("Cycle num: %03zu :: Answer to part 1 = %zu (should be 109638)\n", cycle_num, total);
+    if (cycle_num==0)
+      printf("Answer to part 1 = %zu (should be 109638)\n", total);
 
     // Transpose for printing and tilting WEST
     for (size_t i=0; i<num_cols; i++) {
@@ -61,12 +56,6 @@ int main(void) {
         lines[i][j] = columns[j][i];
       }
     }
-
-#if DEBUG
-    printf("\n");
-    printf("After tilting NORTH\n");
-    for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
-#endif
 
     // Tilt WEST
     for (size_t row=0; row<num_rows; row++) {
@@ -83,12 +72,6 @@ int main(void) {
         }
       }
     }
-
-#if DEBUG
-    printf("\n");
-    printf("After tilting WEST\n");
-    for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
-#endif
 
     // Transpose for tilting SOUTH
     for (size_t i=0; i<num_cols; i++) {
@@ -120,12 +103,6 @@ int main(void) {
       }
     }
 
-#if DEBUG
-    printf("\n");
-    printf("After tilting SOUTH\n");
-    for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
-#endif
-
     // Tilt EAST
     for (size_t row=0; row<num_rows; row++) {
       size_t available_slot = num_cols - 1;
@@ -141,33 +118,21 @@ int main(void) {
         }
       }
     }
-
-#if DEBUG
-    printf("\n");
-    printf("After tilting EAST (%zu full cycles)\n", cycle_num+1);
-    for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
-#endif
-
-    total = 0;
-    for (size_t row=0; row<num_rows; row++) {
-      for (size_t col=0; col<num_cols; col++) {
-        if (lines[row][col] == 'O') total += num_rows - row;
-      }
-    }
-
-    printf("Cycle num: %03zu :: %zu\n", cycle_num+1, total);
   }
 
-  // printf("\n");
-  // printf("After tilting EAST (%d full cycles)\n", NUMCYCLES);
-  // for (size_t i=0; i<num_rows; i++) printf("%s\n", lines[i]);
+  size_t total = 0;
+  for (size_t row=0; row<num_rows; row++) {
+    for (size_t col=0; col<num_cols; col++) {
+      if (lines[row][col] == 'O') total += num_rows - row;
+    }
+  }
 
-  // For part two 111126 is too high
-  // 93752 is wrong as is 93754 and 93755 and 93758
-  //
-  // Cycle starts at 122 and is 21 steps long. (1_000_000_000 - 122) % 21 = 17
-  // This means that the answer is found after calculating 139 total cycles.
-  // 102657 is correct!
+  printf("Answer to part 2 = %zu (should be 102657)\n", total);
+
+  for (size_t col=0; col<num_cols; col++) free(columns[col]);
+  free(columns);
+  free(lines);
+  free(buffer);
 
   return 0;
 }
