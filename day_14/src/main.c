@@ -4,6 +4,17 @@
 
 #include "aoc_lib.h"
 
+size_t get_load_on_north(char **lines, size_t num_rows, size_t num_cols) {
+  size_t total = 0;
+  for (size_t row=0; row<num_rows; row++) {
+    for (size_t col=0; col<num_cols; col++) {
+      if (lines[row][col] == 'O') total += num_rows - row;
+    }
+  }
+
+  return total;
+}
+
 // Experimentally I found that the repeated cycle starts at 122 and is 21 steps long.
 // (1_000_000_000 - 122) % 21 = 17
 // This means that the answer is found after calculating 122 + 17 = 139 total cycles.
@@ -30,12 +41,10 @@ int main(void) {
     }
 
     // Tilt NORTH
-    size_t total = 0;
     for (size_t col=0; col<num_cols; col++) {
       size_t available_slot = strlen(columns[0]);
       for (size_t i=0; i<strlen(columns[col]); i++) {
         if (columns[col][i] == 'O') {
-          total += available_slot;
           if (i != (strlen(columns[col]) - available_slot)) {
             columns[col][strlen(columns[col]) - available_slot] = 'O';
             columns[col][i] = '.';
@@ -47,8 +56,10 @@ int main(void) {
       }
     }
 
-    if (cycle_num==0)
+    if (cycle_num==0) {
+      size_t total = get_load_on_north(lines, num_rows, num_cols);
       printf("Answer to part 1 = %zu (should be 109638)\n", total);
+    }
 
     // Transpose for printing and tilting WEST
     for (size_t i=0; i<num_cols; i++) {
@@ -120,13 +131,7 @@ int main(void) {
     }
   }
 
-  size_t total = 0;
-  for (size_t row=0; row<num_rows; row++) {
-    for (size_t col=0; col<num_cols; col++) {
-      if (lines[row][col] == 'O') total += num_rows - row;
-    }
-  }
-
+  size_t total = get_load_on_north(lines, num_rows, num_cols);
   printf("Answer to part 2 = %zu (should be 102657)\n", total);
 
   for (size_t col=0; col<num_cols; col++) free(columns[col]);
