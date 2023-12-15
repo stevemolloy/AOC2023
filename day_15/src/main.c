@@ -83,11 +83,13 @@ size_t hash_current_char(char c, size_t curr_hash) {
   return curr_hash;
 }
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single input -- the file to be parsed\n");
+    return 1;
+  }
 
-  char *contents = read_entire_file(file_path);
+  char *contents = read_entire_file(argv[1]);
 
   char *cursor = contents;
   size_t hash = 0;
