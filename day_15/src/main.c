@@ -11,8 +11,7 @@ typedef struct {
   int F;
 } Lens;
 
-#define BOX_QUEUE_SIZE 1024
-#define TODO assert(0 && "Not implemented yet")
+#define BOX_QUEUE_SIZE 16
 
 typedef struct {
   size_t cap;
@@ -47,6 +46,7 @@ int remove_item_from_lens_queue(LensQueue *lq, char *label) {
     }
   }
   if (removed >= 0) {
+    free(lq->queue[removed].label);
     for (size_t i=(size_t)removed; i<lq->len-1; i++) {
       lq->queue[i] = lq->queue[i+1];
     }
@@ -60,8 +60,6 @@ int swap_item_in_lens_queue(LensQueue *lq, char *label, size_t fl) {
   for (size_t i=0; i<lq->len; i++) {
     if (strcmp(lq->queue[i].label, label) == 0) {
       removed = (int)i;
-      lq->queue[i].label = calloc(strlen(label), sizeof(char));
-      memcpy(lq->queue[i].label, label, strlen(label));
       lq->queue[i].F = fl;
       return removed;
     }
@@ -91,8 +89,6 @@ int main(void) {
   char *file_path = "./real_input.txt";
 
   char *contents = read_entire_file(file_path);
-  // char *contents = "rn=1";
-  // printf("%s\n", contents);
 
   char *cursor = contents;
   size_t hash = 0;
@@ -112,9 +108,7 @@ int main(void) {
 
   cursor = contents;
 
-  for (size_t i=0; i<256; i++) {
-    Box[i] = empty_lens_queue();
-  }
+  for (size_t i=0; i<256; i++) Box[i] = empty_lens_queue();
 
   while (*cursor) {
     size_t addr = 0;
@@ -125,44 +119,46 @@ int main(void) {
       addr = hash_current_char(*cursor, addr);
       cursor++;
     }
-    printf("Constructed a label: %s\n", label);
     assert(addr < 256);
     if (*cursor == '=') {
       cursor++;
       swap_item_in_lens_queue(&Box[addr], label, *cursor - '0');
     } else if (*cursor == '-') {
       remove_item_from_lens_queue(&Box[addr], label);
+      free(label);
     } else {
       fprintf(stderr, "Error: Could not understand '%c' character\n", *cursor);
       return 1;
     }
     cursor += 2;
-    // free(label);
-
-    for (size_t i=0; i<256; i++) {
-      if (Box[i].len > 0) {
-        printf("Box[%zu]: ", i);
-        for (size_t l=0; l<Box[i].len; l++) {
-          printf("label = %s, FL = %d :", Box[i].queue[l].label, Box[i].queue[l].F);
-        }
-        printf("\n");
-      }
-    }
   }
 
+  // for (size_t i=0; i<256; i++) {
+  //   if (Box[i].len > 0) {
+  //     printf("Box[%zu]: ", i);
+  //     for (size_t l=0; l<Box[i].len; l++) {
+  //       printf("label = %s, FL = %d :", Box[i].queue[l].label, Box[i].queue[l].F);
+  //     }
+  //     printf("\n");
+  //   }
+  // }
   total = 0;
   for (size_t b=0; b<256; b++) {
     for (size_t l=0; l<Box[b].len; l++) {
       size_t prod = (b+1) * (l+1) * Box[b].queue[l].F;
-      printf("prod = %zu\n", prod);
       total += prod;
     }
   }
 
-  printf("Answer to part 2 = %zu\n", total);
+  printf("Answer to part 2 = %zu (should be 268497)\n", total);
 
-  // for (size_t i=0; i<256; i++) free(Box[i]);
-  // free(contents);
+  for (size_t i=0; i<256; i++) {
+    for (size_t l=0; l<Box[l].len; l++) {
+      free(Box[i].queue[l].label);
+    }
+    free_lens_queue(&Box[i]);
+  }
+  free(contents);
 
   return 0;
 }
