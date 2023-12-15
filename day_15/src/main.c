@@ -46,7 +46,6 @@ int remove_item_from_lens_queue(LensQueue *lq, char *label) {
     }
   }
   if (removed >= 0) {
-    free(lq->queue[removed].label);
     for (size_t i=(size_t)removed; i<lq->len-1; i++) {
       lq->queue[i] = lq->queue[i+1];
     }
@@ -112,20 +111,19 @@ int main(void) {
 
   while (*cursor) {
     size_t addr = 0;
-    char *label = calloc(1024, sizeof(char));
-    size_t ind = 0;
+    char *label = cursor;
     while (*cursor != '=' && *cursor != '-') {
-      label[ind++] = *cursor;
       addr = hash_current_char(*cursor, addr);
       cursor++;
     }
     assert(addr < 256);
     if (*cursor == '=') {
+      *cursor = '\0';
       cursor++;
       swap_item_in_lens_queue(&Box[addr], label, *cursor - '0');
     } else if (*cursor == '-') {
+      *cursor = '\0';
       remove_item_from_lens_queue(&Box[addr], label);
-      free(label);
     } else {
       fprintf(stderr, "Error: Could not understand '%c' character\n", *cursor);
       return 1;
