@@ -105,10 +105,9 @@ int main(void) {
   total += hash;
   printf("Answer to part 1 = %zu (should be 510013)\n", total);
 
-  cursor = contents;
-
   for (size_t i=0; i<256; i++) Box[i] = empty_lens_queue();
 
+  cursor = contents;
   while (*cursor) {
     size_t addr = 0;
     char *label = cursor;
@@ -131,15 +130,6 @@ int main(void) {
     cursor += 2;
   }
 
-  // for (size_t i=0; i<256; i++) {
-  //   if (Box[i].len > 0) {
-  //     printf("Box[%zu]: ", i);
-  //     for (size_t l=0; l<Box[i].len; l++) {
-  //       printf("label = %s, FL = %d :", Box[i].queue[l].label, Box[i].queue[l].F);
-  //     }
-  //     printf("\n");
-  //   }
-  // }
   total = 0;
   for (size_t b=0; b<256; b++) {
     for (size_t l=0; l<Box[b].len; l++) {
