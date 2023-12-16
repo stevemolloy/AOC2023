@@ -83,20 +83,20 @@ void solve_path(int X, int Y, size_t incoming_dir, char **mirror_grid, size_t *l
   }
 }
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
-  // char *file_path = "./test1.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single input -- the file to be parsed\n");
+    return 1;
+  }
   char *buffer;
   char **lines;
 
-  size_t num_rows = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_rows = read_entire_file_to_lines(argv[1], &buffer, &lines);
   size_t num_cols = strlen(lines[0]);
 
   size_t *laser_grid = calloc(num_cols*num_rows, sizeof(size_t));
 
   size_t best = 0;
-
   for (int x=0; x<(int)num_rows; x++) {
     int y = 0;
     size_t dir = DOWN;
