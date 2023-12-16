@@ -84,25 +84,81 @@ int main(void) {
   size_t num_cols = strlen(lines[0]);
 
   size_t *laser_grid = calloc(num_cols*num_rows, sizeof(size_t));
-  solve_path(0, 0, RIGHT, lines, laser_grid, num_cols, num_rows);
-  printf("\n");
 
-  size_t total = 0;
-  for (size_t y=0; y<num_rows; y++) {
-    for (size_t x=0; x<num_cols; x++) {
-      if (laser_grid[y*num_cols + x] > 0) total++;
-      if (lines[y][x] != '.') {
-        putchar(lines[y][x]);
-      } else if (laser_grid[y*num_cols + x] > 0) {
-        putchar('#');
+  size_t best = 0;
+
+  for (int x=0; x<(int)num_rows; x++) {
+    int y = 0;
+    size_t dir = DOWN;
+    memset(laser_grid, 0, num_cols*num_rows*sizeof(size_t)); // Zero the grid
+
+    solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
+
+    size_t total = 0;
+    for (size_t y=0; y<num_rows; y++) {
+      for (size_t x=0; x<num_cols; x++) {
+        if (laser_grid[y*num_cols + x] > 0) total++;
       }
-      else putchar('.');
     }
-    printf("\n");
+
+    if (total > best) best = total;
   }
 
-  // 8012 is too low
-  printf("Answer to part 1 = %zu\n", total);
+  for (int x=0; x<(int)num_rows; x++) {
+    int y = num_rows-1;
+    size_t dir = UP;
+    memset(laser_grid, 0, num_cols*num_rows*sizeof(size_t)); // Zero the grid
+
+    solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
+
+    size_t total = 0;
+    for (size_t y=0; y<num_rows; y++) {
+      for (size_t x=0; x<num_cols; x++) {
+        if (laser_grid[y*num_cols + x] > 0) total++;
+      }
+    }
+
+    if (total > best) best = total;
+  }
+
+  for (int y=0; y<(int)num_cols; y++) {
+    int x = 0;
+    size_t dir = RIGHT;
+    memset(laser_grid, 0, num_cols*num_rows*sizeof(size_t)); // Zero the grid
+
+    solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
+
+    size_t total = 0;
+    for (size_t y=0; y<num_rows; y++) {
+      for (size_t x=0; x<num_cols; x++) {
+        if (laser_grid[y*num_cols + x] > 0) total++;
+      }
+    }
+
+    if (total > best) best = total;
+    if (x==0 && y==0) {
+      printf("Answer to part 1 = %zu\n", total);
+    }
+  }
+
+  for (int y=0; y<(int)num_cols; y++) {
+    int x = num_rows-1;
+    size_t dir = LEFT;
+    memset(laser_grid, 0, num_cols*num_rows*sizeof(size_t)); // Zero the grid
+
+    solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
+
+    size_t total = 0;
+    for (size_t y=0; y<num_rows; y++) {
+      for (size_t x=0; x<num_cols; x++) {
+        if (laser_grid[y*num_cols + x] > 0) total++;
+      }
+    }
+
+    if (total > best) best = total;
+  }
+
+  printf("Answer to part 2 = %zu\n", best);
 
   return 0;
 }
