@@ -13,6 +13,16 @@ const size_t LEFT  = 1 << 1;
 const size_t DOWN  = 1 << 2;
 const size_t UP    = 1 << 3;
 
+size_t count_energised_cells(size_t *laser_grid, size_t num_rows, size_t num_cols) {
+  size_t total = 0;
+  for (size_t y=0; y<num_rows; y++) {
+    for (size_t x=0; x<num_cols; x++) {
+      if (laser_grid[y*num_cols + x] > 0) total++;
+    }
+  }
+  return total;
+}
+
 char get_char_at_point(size_t x, size_t y, char**grid) {
   return grid[y][x];
 }
@@ -94,13 +104,7 @@ int main(void) {
 
     solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
 
-    size_t total = 0;
-    for (size_t y=0; y<num_rows; y++) {
-      for (size_t x=0; x<num_cols; x++) {
-        if (laser_grid[y*num_cols + x] > 0) total++;
-      }
-    }
-
+    size_t total = count_energised_cells(laser_grid, num_rows, num_cols);
     if (total > best) best = total;
   }
 
@@ -111,13 +115,7 @@ int main(void) {
 
     solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
 
-    size_t total = 0;
-    for (size_t y=0; y<num_rows; y++) {
-      for (size_t x=0; x<num_cols; x++) {
-        if (laser_grid[y*num_cols + x] > 0) total++;
-      }
-    }
-
+    size_t total = count_energised_cells(laser_grid, num_rows, num_cols);
     if (total > best) best = total;
   }
 
@@ -128,13 +126,7 @@ int main(void) {
 
     solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
 
-    size_t total = 0;
-    for (size_t y=0; y<num_rows; y++) {
-      for (size_t x=0; x<num_cols; x++) {
-        if (laser_grid[y*num_cols + x] > 0) total++;
-      }
-    }
-
+    size_t total = count_energised_cells(laser_grid, num_rows, num_cols);
     if (total > best) best = total;
     if (x==0 && y==0) {
       printf("Answer to part 1 = %zu\n", total);
@@ -148,13 +140,7 @@ int main(void) {
 
     solve_path(x, y, dir, lines, laser_grid, num_cols, num_rows);
 
-    size_t total = 0;
-    for (size_t y=0; y<num_rows; y++) {
-      for (size_t x=0; x<num_cols; x++) {
-        if (laser_grid[y*num_cols + x] > 0) total++;
-      }
-    }
-
+    size_t total = count_energised_cells(laser_grid, num_rows, num_cols);
     if (total > best) best = total;
   }
 
