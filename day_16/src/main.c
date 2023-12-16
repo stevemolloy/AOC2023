@@ -17,8 +17,9 @@ char get_char_at_point(size_t x, size_t y, char**grid) {
   return grid[y][x];
 }
 
-void solve_path(size_t X, size_t Y, size_t incoming_dir, char **mirror_grid, size_t *laser_grid, size_t width, size_t height) {
+void solve_path(int X, int Y, size_t incoming_dir, char **mirror_grid, size_t *laser_grid, size_t width, size_t height) {
   if ((laser_grid[Y*width + X] & incoming_dir) > 0) return;  // We have already tracked this beam, so no need to follow it again
+  if (X<0 || (size_t)X==width || Y<0 || (size_t)Y==height) return;
   laser_grid[Y*width + X] |= incoming_dir;    // OR the laser_grid with the incoming beam to mark it
   char object = get_char_at_point(X, Y, mirror_grid);  // Get the mirror/splitter/nothing that is at this point in the grid
   size_t outgoing_dir;
@@ -59,19 +60,15 @@ void solve_path(size_t X, size_t Y, size_t incoming_dir, char **mirror_grid, siz
   // Now that we know the outgoing_dir, recurse into the next step
   // Note the bounds checks that cause an early return
   if ((outgoing_dir & RIGHT) > 0) {
-    if (X == width-1) return;
     solve_path(X+1, Y, RIGHT, mirror_grid, laser_grid, width, height);
   }
   if ((outgoing_dir & LEFT) > 0) {
-    if (X == 0) return;
     solve_path(X-1, Y, LEFT, mirror_grid, laser_grid, width, height);
   }
   if ((outgoing_dir & DOWN) > 0) {
-    if (Y == height - 1) return;
     solve_path(X, Y+1, DOWN, mirror_grid, laser_grid, width, height);
   }
   if ((outgoing_dir & UP) > 0) {
-    if (Y == 0) return;
     solve_path(X, Y-1, UP, mirror_grid, laser_grid, width, height);
   }
 }
@@ -94,9 +91,9 @@ int main(void) {
   for (size_t y=0; y<num_rows; y++) {
     for (size_t x=0; x<num_cols; x++) {
       if (laser_grid[y*num_cols + x] > 0) total++;
-      /*if (lines[y][x] != '.') {
+      if (lines[y][x] != '.') {
         putchar(lines[y][x]);
-      } else */if (laser_grid[y*num_cols + x] > 0) {
+      } else if (laser_grid[y*num_cols + x] > 0) {
         putchar('#');
       }
       else putchar('.');
