@@ -1,11 +1,8 @@
 #include <assert.h>
 #include <ctype.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "aoc_lib.h"
 
