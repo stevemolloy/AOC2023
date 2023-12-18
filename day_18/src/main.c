@@ -17,13 +17,15 @@ int64_t det(Point pt1, Point pt2) {
   return pt1.x * pt2.y - pt2.x *pt1.y;
 }
 
-int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "Please provide a single input -- the file to be parsed\n");
+    return 1;
+  }
   char *buffer;
   char **lines;
 
-  size_t num_rows = read_entire_file_to_lines(file_path, &buffer, &lines);
+  size_t num_rows = read_entire_file_to_lines(argv[1], &buffer, &lines);
   Point *points = malloc(num_rows * sizeof(Point));
 
   {
