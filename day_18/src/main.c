@@ -36,7 +36,6 @@ int main(void) {
       advance_past_chars(&line, " ");
       size_t distance = get_next_int_from_string(&line);
       total_dist += distance;
-      printf("distance = %zu, total_distance = %ld\n", distance, total_dist);
       points[i] = points[i-1];
       if (command == 'R') points[i].x += distance;
       else if (command == 'L') points[i].x -= distance;
@@ -50,7 +49,7 @@ int main(void) {
     }
     total += det(points[num_rows-1], points[0]);
 
-    printf("Answer to part 1 = %ld\n", (total/2) + (total_dist/2) + 1);
+    printf("Answer to part 1 = %ld (should be 34329)\n", (total/2) + (total_dist/2) + 1);
   }
 
   {
@@ -60,15 +59,15 @@ int main(void) {
       char *line = lines[i];
       advance_past_chars(&line, "LRUD 0123456789(");
       line++;
+
       size_t distance = 0;
       for (size_t n=0; n<5; n++) {
-        if (isdigit(*line)) {
-          distance = distance*16 + *line - '0';
-        } else {
-          distance = distance*16 + *line - 'a' + 10;
-        }
+        if (isdigit(*line)) distance = distance*16 + *line - '0';
+        else                distance = distance*16 + *line - 'a' + 10;
         line++;
       }
+      total_dist += distance;
+
       char command;
       if (*line == '0') command = 'R';
       else if (*line == '1') command = 'D';
@@ -76,9 +75,7 @@ int main(void) {
       else if (*line == '3') command = 'U';
       else assert (0 && "Unreachable");
       line++;
-      advance_past_chars(&line, " ");
-      total_dist += distance;
-      printf("distance = %zu, direction = %c\n", distance, command);
+
       points[i] = points[i-1];
       if (command == 'R') points[i].x += distance;
       else if (command == 'L') points[i].x -= distance;
@@ -87,12 +84,10 @@ int main(void) {
     }
 
     int64_t total = 0;
-    for (size_t i=1; i<num_rows; i++) {
-      total += det(points[i-1], points[i]);
-    }
+    for (size_t i=1; i<num_rows; i++) total += det(points[i-1], points[i]);
     total += det(points[num_rows-1], points[0]);
 
-    printf("Answer to part 1 = %ld\n", (total/2) + (total_dist/2) + 1);
+    printf("Answer to part 2 = %ld (should be 42617947302920)\n", (total/2) + (total_dist/2) + 1);
   }
 
   free(points);
@@ -101,3 +96,4 @@ int main(void) {
 
   return 0;
 }
+
