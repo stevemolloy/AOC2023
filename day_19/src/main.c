@@ -52,12 +52,15 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
   char *wf = get_rule_condition(wfs, num_wfs, workflow_name);
   
   while (*wf) {
+    while (*wf == ',') wf++;
+    if (strcmp("A", wf) == 0) return acc + range_size(r);
+    if (strcmp("R", wf) == 0) return 0;
     char *destination = calloc(NAME_LEN, sizeof(char));
     size_t val = 0;
 
     char property = *wf;
-    wf++;
-    if (!isalpha(*wf)) {
+    if (!isalpha(*(wf+1))) {
+      wf++;
       char test = *wf;
       wf++;
       val = get_next_val_from_string(&wf);
@@ -102,140 +105,8 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
       }
       acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, acc);
     }
-
-    if (*wf == 'x' && !isalpha(*(wf+1))) {
-      wf++;
-      if (*wf == '<') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val < new_r.x_hi) new_r.x_hi = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else if (*wf == '>') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val > new_r.x_lo) new_r.x_lo = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else assert(0 && "Unreachable if there are only < and > conditions");
-      wf++;
-    }
-    if (*wf == 'm' && !isalpha(*(wf+1))) {
-      wf++;
-      if (*wf == '<') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val < new_r.m_hi) new_r.m_hi = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else if (*wf == '>') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val > new_r.m_lo) new_r.m_lo = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else assert(0 && "Unreachable if there are only < and > conditions");
-      wf++;
-    }
-    if (*wf == 'a' && !isalpha(*(wf+1))) {
-      wf++;
-      if (*wf == '<') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val < new_r.a_hi) new_r.a_hi = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else if (*wf == '>') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val > new_r.a_lo) new_r.a_lo = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else assert(0 && "Unreachable if there are only < and > conditions");
-      wf++;
-    }
-    if (*wf == 's' && !isalpha(*(wf+1))) {
-      wf++;
-      if (*wf == '<') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val < new_r.s_hi) new_r.s_hi = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      } else if (*wf == '>') {
-        wf++;
-        val = get_next_val_from_string(&wf);
-        wf++;
-        memset(destination, 0, NAME_LEN*sizeof(char));
-        size_t t = 0;
-        while (isalpha(*wf)) {
-          destination[t++] = *wf;
-          wf++;
-        }
-        Range new_r = r;
-        if (val > new_r.s_lo) new_r.s_lo = val;
-        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
-      }
-      wf++;
-    } else {
-      memset(destination, 0, NAME_LEN*sizeof(char));
-      size_t t = 0;
-      while (isalpha(*wf)) {
-        destination[t++] = *wf;
-        wf++;
-      }
-      acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, acc);
-    }
   }
+
   return acc;
 }
 
