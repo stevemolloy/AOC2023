@@ -29,10 +29,10 @@ typedef struct {
 size_t range_size(Range r) {
   if ((r.x_hi<=r.x_lo) || (r.m_hi<=r.m_lo) || (r.a_hi<=r.m_lo) || (r.s_hi<=r.s_lo)) return 0;
   size_t result = 1;
-  result *= r.x_hi - r.x_lo;
-  result *= r.m_hi - r.m_lo;
-  result *= r.a_hi - r.a_lo;
-  result *= r.s_hi - r.s_lo;
+  result *= r.x_hi - r.x_lo + 1;
+  result *= r.m_hi - r.m_lo + 1;
+  result *= r.a_hi - r.a_lo + 1;
+  result *= r.s_hi - r.s_lo + 1;
   return result;
 }
 
@@ -74,23 +74,59 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
       Range new_r = r;
       switch (property) {
         case 'x':
-          if (test=='>' && new_r.x_lo < val)      new_r.x_lo = val;
-          else if (test=='<' && new_r.x_hi > val) new_r.x_hi = val;
+          if (test == '>') {
+            if      (new_r.x_lo < val) new_r.x_lo = val;
+            else if (new_r.x_hi > val) new_r.x_hi = val;
+            if      (r.x_hi > val) r.x_hi = val;
+            else if (r.x_lo < val) r.x_lo = val;
+          } else if (test == '<') {
+            if      (new_r.x_hi > val) new_r.x_hi = val;
+            else if (new_r.x_lo < val) new_r.x_lo = val;
+            if      (r.x_lo < val) r.x_lo = val;
+            else if (r.x_hi > val) r.x_hi = val;
+          }
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 'm':
-          if (test=='>' && new_r.m_lo < val)      new_r.m_lo = val;
-          else if (test=='<' && new_r.m_hi > val) new_r.m_hi = val;
+          if (test=='>') {
+            if      (new_r.m_lo < val) new_r.m_lo = val;
+            else if (new_r.m_hi > val) new_r.m_hi = val;
+            if      (r.m_hi > val) r.m_hi = val;
+            else if (r.m_lo < val) r.m_lo = val;
+          } else if (test == '<') {
+            if      (new_r.m_hi > val) new_r.m_hi = val;
+            else if (new_r.m_lo < val) new_r.m_lo = val;
+            if      (r.m_lo < val) r.m_lo = val;
+            else if (r.m_hi > val) r.m_hi = val;
+          }
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 'a':
-          if (test=='>' && new_r.a_lo < val)      new_r.a_lo = val;
-          else if (test=='<' && new_r.a_hi > val) new_r.a_hi = val;
+          if (test == '>') {
+            if      (new_r.a_lo < val) new_r.a_lo = val;
+            else if (new_r.a_hi > val) new_r.a_hi = val;
+            if      (r.a_hi > val) r.a_hi = val;
+            else if (r.a_lo < val) r.a_lo = val;
+          } else if (test == '<') {
+            if      (new_r.a_hi > val) new_r.a_hi = val;
+            else if (new_r.a_lo < val) new_r.a_lo = val;
+            if      (r.a_lo < val) r.a_lo = val;
+            else if (r.a_hi > val) r.a_hi = val;
+          }
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 's':
-          if (test=='>' && new_r.s_lo < val)      new_r.s_lo = val;
-          else if (test=='<' && new_r.s_hi > val) new_r.s_hi = val;
+          if (test == '>') {
+            if      (new_r.s_lo < val) new_r.s_lo = val;
+            else if (new_r.s_hi > val) new_r.s_hi = val;
+            if      (r.s_hi > val) r.s_hi = val;
+            else if (r.s_lo < val) r.s_lo = val;
+          } else if (test == '<') {
+            if      (new_r.s_hi > val) new_r.s_hi = val;
+            else if (new_r.s_lo < val) new_r.s_lo = val;
+            if      (r.s_lo < val) r.s_lo = val;
+            else if (r.s_hi > val) r.s_hi = val;
+          }
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         default:
