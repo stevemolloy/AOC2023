@@ -27,12 +27,12 @@ typedef struct {
 } Range;
 
 size_t range_size(Range r) {
-  if ((r.x_hi<=r.x_lo) || (r.m_hi<=r.m_lo) || (r.a_hi<=r.m_lo) || (r.s_hi<=r.s_lo)) return 0;
+  if ((r.x_hi<=r.x_lo) || (r.m_hi<=r.m_lo) || (r.a_hi<=r.a_lo) || (r.s_hi<=r.s_lo)) return 0;
   size_t result = 1;
-  result *= r.x_hi - r.x_lo + 1;
-  result *= r.m_hi - r.m_lo + 1;
-  result *= r.a_hi - r.a_lo + 1;
-  result *= r.s_hi - r.s_lo + 1;
+  result *= r.x_hi - r.x_lo;
+  result *= r.m_hi - r.m_lo;
+  result *= r.a_hi - r.a_lo;
+  result *= r.s_hi - r.s_lo;
   return result;
 }
 
@@ -47,9 +47,14 @@ char *get_rule_condition(Workflow *workflows, size_t num_workflows, char *name) 
 }
 
 size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char *workflow_name, size_t acc) {
+  printf("Called with range: %zu->%zu : %zu->%zu : %zu->%zu : %zu->%zu\n",
+      r.x_lo, r.x_hi, r.m_lo, r.m_hi,
+      r.a_lo, r.a_hi, r.s_lo, r.s_hi);
   if (strcmp("A", workflow_name) == 0) return acc + range_size(r);
   if (strcmp("R", workflow_name) == 0) return 0;
   char *wf = get_rule_condition(wfs, num_wfs, workflow_name);
+  printf("\n");
+  printf("Workflow ==> %s\n", wf);
   
   while (*wf) {
     while (*wf == ',') wf++;
@@ -75,59 +80,43 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
       switch (property) {
         case 'x':
           if (test == '>') {
-            if      (new_r.x_lo < val) new_r.x_lo = val;
-            else if (new_r.x_hi > val) new_r.x_hi = val;
-            if      (r.x_hi > val) r.x_hi = val;
-            else if (r.x_lo < val) r.x_lo = val;
-          } /*else if (test == '<') {
-            if      (new_r.x_hi > val) new_r.x_hi = val;
-            else if (new_r.x_lo < val) new_r.x_lo = val;
-            if      (r.x_lo < val) r.x_lo = val;
-            else if (r.x_hi > val) r.x_hi = val;
-          }*/
-          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+            if      (new_r.x_lo < val) new_r.x_lo = val+1;
+            if      (r.x_hi > val) r.x_hi = val-1;
+          } else if (test == '<') {
+            if      (new_r.x_hi > val) new_r.x_hi = val-1;
+            if      (r.x_lo < val) r.x_lo = val+1;
+          }
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, 0);
           break;
         case 'm':
           if (test=='>') {
-            if      (new_r.m_lo < val) new_r.m_lo = val;
-            else if (new_r.m_hi > val) new_r.m_hi = val;
-            if      (r.m_hi > val) r.m_hi = val;
-            else if (r.m_lo < val) r.m_lo = val;
-          } /*else if (test == '<') {
-            if      (new_r.m_hi > val) new_r.m_hi = val;
-            else if (new_r.m_lo < val) new_r.m_lo = val;
-            if      (r.m_lo < val) r.m_lo = val;
-            else if (r.m_hi > val) r.m_hi = val;
-          }*/
-          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+            if      (new_r.m_lo < val) new_r.m_lo = val+1;
+            if      (r.m_hi > val) r.m_hi = val-1;
+          } else if (test == '<') {
+            if      (new_r.m_hi > val) new_r.m_hi = val-1;
+            if      (r.m_lo < val) r.m_lo = val+1;
+          }
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, 0);
           break;
         case 'a':
           if (test == '>') {
-            if      (new_r.a_lo < val) new_r.a_lo = val;
-            else if (new_r.a_hi > val) new_r.a_hi = val;
-            if      (r.a_hi > val) r.a_hi = val;
-            else if (r.a_lo < val) r.a_lo = val;
-          } /*else if (test == '<') {
-            if      (new_r.a_hi > val) new_r.a_hi = val;
-            else if (new_r.a_lo < val) new_r.a_lo = val;
-            if      (r.a_lo < val) r.a_lo = val;
-            else if (r.a_hi > val) r.a_hi = val;
-          }*/
-          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+            if      (new_r.a_lo < val) new_r.a_lo = val+1;
+            if      (r.a_hi > val) r.a_hi = val-1;
+          } else if (test == '<') {
+            if      (new_r.a_hi > val) new_r.a_hi = val-1;
+            if      (r.a_lo < val) r.a_lo = val+1;
+          }
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, 0);
           break;
         case 's':
           if (test == '>') {
-            if      (new_r.s_lo < val) new_r.s_lo = val;
-            else if (new_r.s_hi > val) new_r.s_hi = val;
-            if      (r.s_hi > val) r.s_hi = val;
-            else if (r.s_lo < val) r.s_lo = val;
-          } /*else if (test == '<') {
-            if      (new_r.s_hi > val) new_r.s_hi = val;
-            else if (new_r.s_lo < val) new_r.s_lo = val;
-            if      (r.s_lo < val) r.s_lo = val;
-            else if (r.s_hi > val) r.s_hi = val;
-          }*/
-          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+            if      (new_r.s_lo < val) new_r.s_lo = val+1;
+            if      (r.s_hi > val) r.s_hi = val-1;
+          } else if (test == '<') {
+            if      (new_r.s_hi > val) new_r.s_hi = val-1;
+            if      (r.s_lo < val) r.s_lo = val+1;
+          }
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, 0);
           break;
         default:
           fprintf(stderr, "Property must be 'x', 'm', 'a', or 's'. Found %c\n", property);
@@ -139,7 +128,7 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
         destination[t++] = *wf;
         wf++;
       }
-      acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, acc);
+      acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, 0);
     }
   }
 
@@ -148,7 +137,8 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
 
 int main(void) {
   // char *file_path = "./my_test.txt";
-  char *file_path = "./test_input.txt";
+  char *file_path = "./my_test2.txt";
+  // char *file_path = "./test_input.txt";
   // char *file_path = "./real_input.txt";
   char *buffer;
   char **lines;
@@ -456,6 +446,7 @@ int main(void) {
     .s_lo=1, .s_hi=4000,
   };
   size_t ans2 = get_num_that_pass_condition(range, workflows, workflow_list_len, "in", 0);
+  printf("\n");
   printf("Answer to part 2 = %zu (cf 167409079868000 for test input)\n", ans2);
   printf("Ratio = %f\n", (float)ans2 / 167409079868000.0);
 
