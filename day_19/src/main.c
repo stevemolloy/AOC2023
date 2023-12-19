@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,23 @@ typedef struct {
   char *conditions;
 } Workflow;
 
+typedef struct {
+  size_t x_lo, x_hi;
+  size_t m_lo, m_hi;
+  size_t a_lo, a_hi;
+  size_t s_lo, s_hi;
+} Range;
+
+size_t range_size(Range r) {
+  if ((r.x_hi<=r.x_lo) || (r.m_hi<=r.m_lo) || (r.a_hi<=r.m_lo) || (r.s_hi<=r.s_lo)) return 0;
+  size_t result = 1;
+  result *= r.x_hi - r.x_lo;
+  result *= r.m_hi - r.m_lo;
+  result *= r.a_hi - r.a_lo;
+  result *= r.s_hi - r.s_lo;
+  return result;
+}
+
 char *get_rule_condition(Workflow *workflows, size_t num_workflows, char *name) {
   for (size_t i=0; i<num_workflows; i++) {
     if (strcmp(name, workflows[i].name) == 0) {
@@ -28,9 +46,203 @@ char *get_rule_condition(Workflow *workflows, size_t num_workflows, char *name) 
   exit(1);
 }
 
+size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char *workflow_name, size_t acc) {
+  if (strcmp("A", workflow_name) == 0) return acc + range_size(r);
+  if (strcmp("R", workflow_name) == 0) return 0;
+  char *wf = get_rule_condition(wfs, num_wfs, workflow_name);
+  
+  while (*wf) {
+    char *destination = calloc(NAME_LEN, sizeof(char));
+    size_t val = 0;
+
+    char property = *wf;
+    wf++;
+    if (!isalpha(*wf)) {
+      char test = *wf;
+      wf++;
+      val = get_next_val_from_string(&wf);
+      wf++;
+      size_t t = 0;
+      while (isalpha(*wf)) {
+        destination[t++] = *wf;
+        wf++;
+      }
+
+      Range new_r = r;
+      switch (property) {
+        case 'x':
+          if (test=='>' && new_r.x_lo < val)      new_r.x_lo = val;
+          else if (test=='<' && new_r.x_hi > val) new_r.x_hi = val;
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+          break;
+        case 'm':
+          if (test=='>' && new_r.m_lo < val)      new_r.m_lo = val;
+          else if (test=='<' && new_r.m_hi > val) new_r.m_hi = val;
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+          break;
+        case 'a':
+          if (test=='>' && new_r.a_lo < val)      new_r.a_lo = val;
+          else if (test=='<' && new_r.a_hi > val) new_r.a_hi = val;
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+          break;
+        case 's':
+          if (test=='>' && new_r.s_lo < val)      new_r.s_lo = val;
+          else if (test=='<' && new_r.s_hi > val) new_r.s_hi = val;
+          acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+          break;
+        default:
+          fprintf(stderr, "Property must be 'x', 'm', 'a', or 's'. Found %c\n", property);
+          exit(1);
+      }
+    } else {
+      size_t t = 0;
+      while (isalpha(*wf)) {
+        destination[t++] = *wf;
+        wf++;
+      }
+      acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, acc);
+    }
+
+    if (*wf == 'x' && !isalpha(*(wf+1))) {
+      wf++;
+      if (*wf == '<') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val < new_r.x_hi) new_r.x_hi = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else if (*wf == '>') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val > new_r.x_lo) new_r.x_lo = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else assert(0 && "Unreachable if there are only < and > conditions");
+      wf++;
+    }
+    if (*wf == 'm' && !isalpha(*(wf+1))) {
+      wf++;
+      if (*wf == '<') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val < new_r.m_hi) new_r.m_hi = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else if (*wf == '>') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val > new_r.m_lo) new_r.m_lo = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else assert(0 && "Unreachable if there are only < and > conditions");
+      wf++;
+    }
+    if (*wf == 'a' && !isalpha(*(wf+1))) {
+      wf++;
+      if (*wf == '<') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val < new_r.a_hi) new_r.a_hi = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else if (*wf == '>') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val > new_r.a_lo) new_r.a_lo = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else assert(0 && "Unreachable if there are only < and > conditions");
+      wf++;
+    }
+    if (*wf == 's' && !isalpha(*(wf+1))) {
+      wf++;
+      if (*wf == '<') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val < new_r.s_hi) new_r.s_hi = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      } else if (*wf == '>') {
+        wf++;
+        val = get_next_val_from_string(&wf);
+        wf++;
+        memset(destination, 0, NAME_LEN*sizeof(char));
+        size_t t = 0;
+        while (isalpha(*wf)) {
+          destination[t++] = *wf;
+          wf++;
+        }
+        Range new_r = r;
+        if (val > new_r.s_lo) new_r.s_lo = val;
+        acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
+      }
+      wf++;
+    } else {
+      memset(destination, 0, NAME_LEN*sizeof(char));
+      size_t t = 0;
+      while (isalpha(*wf)) {
+        destination[t++] = *wf;
+        wf++;
+      }
+      acc += get_num_that_pass_condition(r, wfs, num_wfs, destination, acc);
+    }
+  }
+  return acc;
+}
+
 int main(void) {
-  // char *file_path = "./test_input.txt";
-  char *file_path = "./real_input.txt";
+  // char *file_path = "./my_test.txt";
+  char *file_path = "./test_input.txt";
+  // char *file_path = "./real_input.txt";
   char *buffer;
   char **lines;
 
@@ -104,7 +316,6 @@ int main(void) {
     char *rule_to_apply = "in";
     bool terminated = false;
     do {
-      printf("%s --> ", rule_to_apply);
       char *cond = get_rule_condition(workflows, workflow_list_len, rule_to_apply);
 
       while (1) {
@@ -122,13 +333,11 @@ int main(void) {
             }
             if (parts[p].x < val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -147,13 +356,11 @@ int main(void) {
             }
             if (parts[p].x > val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -175,13 +382,11 @@ int main(void) {
             }
             if (parts[p].m < val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -200,13 +405,11 @@ int main(void) {
             }
             if (parts[p].m > val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -228,13 +431,11 @@ int main(void) {
             }
             if (parts[p].a < val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -253,13 +454,11 @@ int main(void) {
             }
             if (parts[p].a > val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -281,13 +480,11 @@ int main(void) {
             }
             if (parts[p].s < val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -306,13 +503,11 @@ int main(void) {
             }
             if (parts[p].s > val) {
               if (strcmp("A", destination)==0) {
-                printf("Accepted!\n");
                 total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
                 terminated = true;
                 break;
               }
               if (strcmp("R", destination)==0) {
-                printf("Rejected!\n");
                 terminated = true;
                 break;
               }
@@ -331,12 +526,10 @@ int main(void) {
             cond++;
           }
           if (strcmp("A", destination)==0) {
-            printf("Accepted!\n");
             total += parts[p].x + parts[p].m + parts[p].a + parts[p].s;
             terminated = true;
           }
           if (strcmp("R", destination)==0) {
-            printf("Rejected!\n");
             terminated = true;
           }
           rule_to_apply = destination;
@@ -349,11 +542,22 @@ int main(void) {
 
   printf("Answer to part 1 = %zu\n", total);
 
+  Range range = {
+    .x_lo=1, .x_hi=4000,
+    .m_lo=1, .m_hi=4000,
+    .a_lo=1, .a_hi=4000,
+    .s_lo=1, .s_hi=4000,
+  };
+  size_t ans2 = get_num_that_pass_condition(range, workflows, workflow_list_len, "in", 0);
+  printf("Answer to part 2 = %zu (cf 167409079868000 for test input)\n", ans2);
+  printf("Ratio = %f\n", (float)ans2 / 167409079868000.0);
+
   for (size_t i=0; i<workflow_list_len; i++) {
     free(workflows[i].name);
     free(workflows[i].conditions);
   }
   free(workflows);
+  free(destination);
   free(parts);
   free(lines);
   free(buffer);
