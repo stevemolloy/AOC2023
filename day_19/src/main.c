@@ -79,12 +79,12 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
             else if (new_r.x_hi > val) new_r.x_hi = val;
             if      (r.x_hi > val) r.x_hi = val;
             else if (r.x_lo < val) r.x_lo = val;
-          } else if (test == '<') {
+          } /*else if (test == '<') {
             if      (new_r.x_hi > val) new_r.x_hi = val;
             else if (new_r.x_lo < val) new_r.x_lo = val;
             if      (r.x_lo < val) r.x_lo = val;
             else if (r.x_hi > val) r.x_hi = val;
-          }
+          }*/
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 'm':
@@ -93,12 +93,12 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
             else if (new_r.m_hi > val) new_r.m_hi = val;
             if      (r.m_hi > val) r.m_hi = val;
             else if (r.m_lo < val) r.m_lo = val;
-          } else if (test == '<') {
+          } /*else if (test == '<') {
             if      (new_r.m_hi > val) new_r.m_hi = val;
             else if (new_r.m_lo < val) new_r.m_lo = val;
             if      (r.m_lo < val) r.m_lo = val;
             else if (r.m_hi > val) r.m_hi = val;
-          }
+          }*/
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 'a':
@@ -107,12 +107,12 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
             else if (new_r.a_hi > val) new_r.a_hi = val;
             if      (r.a_hi > val) r.a_hi = val;
             else if (r.a_lo < val) r.a_lo = val;
-          } else if (test == '<') {
+          } /*else if (test == '<') {
             if      (new_r.a_hi > val) new_r.a_hi = val;
             else if (new_r.a_lo < val) new_r.a_lo = val;
             if      (r.a_lo < val) r.a_lo = val;
             else if (r.a_hi > val) r.a_hi = val;
-          }
+          }*/
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         case 's':
@@ -121,12 +121,12 @@ size_t get_num_that_pass_condition(Range r, Workflow *wfs, size_t num_wfs, char 
             else if (new_r.s_hi > val) new_r.s_hi = val;
             if      (r.s_hi > val) r.s_hi = val;
             else if (r.s_lo < val) r.s_lo = val;
-          } else if (test == '<') {
+          } /*else if (test == '<') {
             if      (new_r.s_hi > val) new_r.s_hi = val;
             else if (new_r.s_lo < val) new_r.s_lo = val;
             if      (r.s_lo < val) r.s_lo = val;
             else if (r.s_hi > val) r.s_hi = val;
-          }
+          }*/
           acc += get_num_that_pass_condition(new_r, wfs, num_wfs, destination, acc);
           break;
         default:
