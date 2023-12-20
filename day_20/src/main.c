@@ -32,18 +32,16 @@ void add_to_dyn_array(DynArr *da, char *data) {
 }
 
 typedef struct {
-  DynArr input_inds;
+  DynArr inputs;
   DynArr last_recvd;
-  DynArr dests;
 } Con_Module;
 
 typedef struct {
-  DynArr dests;
+  bool nop;
 } Broadcaster;
 
 typedef struct {
   bool state;
-  DynArr dests;
 } FF_Module;
 
 typedef enum {
@@ -62,6 +60,9 @@ typedef struct {
   char *name;
   ModType type;
   SigType last_sig_recvd;
+  char *sign_recvd_from;
+  SigType sending;
+  DynArr dests;
   union {
     Con_Module con_module;
     Broadcaster broadcaster;
@@ -69,48 +70,123 @@ typedef struct {
   } as;
 } Module;
 
+size_t find_module_by_name(Module *modules, size_t num_modules, char *name) {
+  for (size_t i=0; i<num_modules; i++) {
+    if (strcmp(modules[i].name, name)==0) return i;
+  }
+  fprintf(stderr, "Searched for '%s', but could not find it\n", name);
+  exit(1);
+}
+
+void send_signal(Module *mod, Module *modules, size_t num_modules) {
+  for (size_t i=0; i<mod->dests.len; i++) {
+    size_t mod_num = find_module_by_name(modules, num_modules, mod->dests.data[i]);
+
+    if (mod->sending != NONE) modules[mod_num].last_sig_recvd = mod->sending;
+
+    if (modules[mod_num].type == CON) {
+      for (size_t j=0; j<modules[mod_num].as.con_module.inputs.len; j++) {
+        printf("\tTesting if %s equals %s\n", modules[mod_num].as.con_module.inputs.data[j], mod->dests.data[i]);
+        if (strcmp(modules[mod_num].as.con_module.inputs.data[j], mod->name)==0) {
+          if (mod->sending==HI) {
+            modules[mod_num].as.con_module.last_recvd.data[j] = "T";
+          } else if (mod->sending==LO) {
+            modules[mod_num].as.con_module.last_recvd.data[j] = "F";
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
+void process_signal(Module *mod) {
+  bool all_conj_true = true;
+  switch (mod->type) {
+    case BROAD:
+      mod->sending = mod->last_sig_recvd;
+      break;
+    case CON:
+      if (mod->last_sig_recvd != NONE) {
+        for (size_t i=0; i<mod->as.con_module.inputs.len; i++) {
+          if (*mod->as.con_module.last_recvd.data[i] != 'T') {
+            all_conj_true = false;
+            break;
+          }
+        }
+        if (!all_conj_true) {
+          mod->sending = HI;
+        } else {
+          mod->sending = LO;
+        }
+      } else {
+        mod->sending = NONE;
+      }
+      break;
+    case FF:
+      switch (mod->last_sig_recvd) {
+        case NONE:
+        case HI:
+          mod->sending = NONE;
+          break;
+        case LO:
+          // printf("FF state before LO: %d\n", mod->as.ff_module.state);
+          if (!mod->as.ff_module.state) {
+            mod->as.ff_module.state = true;
+            mod->sending = HI;
+          } else {
+            mod->as.ff_module.state = false;
+            mod->sending = LO;
+          }
+          // printf("FF state after LO: %d\n", mod->as.ff_module.state);
+          break;
+      }
+      break;
+  }
+  mod->last_sig_recvd = NONE;
+}
+
 void print_module(Module mod) {
   printf("%s: ", mod.name);
   switch (mod.type) {
     case CON:
-      printf("conjunction module\n");
-      printf("\tDests = ");
-      for (size_t i=0; i<mod.as.con_module.dests.len; i++) {
-        printf("%s ", mod.as.con_module.dests.data[i]);
-      }
-      printf("\n");
+      printf("conjunction module: ");
       break;
     case BROAD:
-      printf("broadcaster module\n");
-      printf("\tDests = ");
-      for (size_t i=0; i<mod.as.broadcaster.dests.len; i++) {
-        printf("%s ", mod.as.broadcaster.dests.data[i]);
-      }
-      printf("\n");
+      printf("broadcaster module: ");
       break;
     case FF:
-      printf("flip-flop module\n");
-      printf("\tDests = ");
-      for (size_t i=0; i<mod.as.ff_module.dests.len; i++) {
-        printf("%s ", mod.as.ff_module.dests.data[i]);
-      }
-      printf("\n");
+      printf("flip-flop module (state = %d): ", mod.as.ff_module.state);
       break;
   }
+  if (mod.sending == HI) {
+    printf("Sending HI to ");
+    for (size_t i=0; i<mod.dests.len; i++) {
+      printf("%s ", mod.dests.data[i]);
+    }
+    printf("\n");
+  }
+  else if (mod.sending == LO) {
+    printf("Sending LO to ");
+    for (size_t i=0; i<mod.dests.len; i++) {
+      printf("%s ", mod.dests.data[i]);
+    }
+    printf("\n");
+  }
+  else printf("\n");
+
 }
 
 Broadcaster new_broadcaster(void) {
   Broadcaster result = {0};
-  result.dests = new_dyn_arr();
   return result;
 }
 
 Con_Module new_con_module(void) {
   Con_Module result = {0};
 
-  result.input_inds = new_dyn_arr();
+  result.inputs = new_dyn_arr();
   result.last_recvd = new_dyn_arr();
-  result.dests = new_dyn_arr();
 
   return result;
 }
@@ -118,8 +194,6 @@ Con_Module new_con_module(void) {
 FF_Module new_ff_module(void) {
   FF_Module result = {0};
   
-  result.dests = new_dyn_arr();
-
   return result;
 }
 
@@ -156,6 +230,7 @@ int main(void) {
 
     char *name;
     modules[i] = (Module) {0};
+    modules[i].dests = new_dyn_arr();
     switch (*l) {
       case '%':
         l++;
@@ -167,11 +242,13 @@ int main(void) {
         modules[i].as.ff_module = new_ff_module();
 
         modules[i].last_sig_recvd = NONE;
+        modules[i].sending = NONE;
 
         l++;
         advance_past_chars(&l, " ->");
 
-        add_strings_to_dynarr(&modules[i].as.ff_module.dests, l);
+        printf("Adding %s to FF\n", l);
+        add_strings_to_dynarr(&modules[i].dests, l);
 
         break;
       case '&':
@@ -184,11 +261,13 @@ int main(void) {
         modules[i].as.con_module = new_con_module();
 
         modules[i].last_sig_recvd = NONE;
+        modules[i].sending = NONE;
 
         l++;
         advance_past_chars(&l, " ->");
 
-        add_strings_to_dynarr(&modules[i].as.con_module.dests, l);
+        printf("Adding %s to CON\n", l);
+        add_strings_to_dynarr(&modules[i].dests, l);
 
         break;
       default:
@@ -201,18 +280,35 @@ int main(void) {
         modules[i].as.broadcaster = new_broadcaster();
 
         modules[i].last_sig_recvd = LO;
+        modules[i].sending = NONE;
 
         l++;
         advance_past_chars(&l, " ->");
 
-        add_strings_to_dynarr(&modules[i].as.broadcaster.dests, l);
+        printf("Adding %s to BROAD\n", l);
+        add_strings_to_dynarr(&modules[i].dests, l);
 
         break;
     }
   }
 
   for (size_t i=0; i<num_lines; i++) {
-    print_module(modules[i]);
+    for (size_t d=0; d<modules[i].dests.len; d++) {
+      size_t mod_num = find_module_by_name(modules, num_lines, modules[i].dests.data[d]);
+      if (modules[mod_num].type == CON) {
+        add_to_dyn_array(&modules[mod_num].as.con_module.inputs, modules[i].name);
+        add_to_dyn_array(&modules[mod_num].as.con_module.last_recvd, "F");
+      }
+    }
+  }
+
+  size_t steps = 9;
+  for (size_t step=0; step<steps; step++) {
+    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
+    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
+
+    printf("Step %zu\n", step);
+    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
   }
 
   return 0;
