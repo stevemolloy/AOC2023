@@ -9,6 +9,9 @@
 
 #define INI_CAP 32
 
+size_t LO_PULSE_COUNT = 0;
+size_t HI_PULSE_COUNT = 0;
+
 typedef struct {
   size_t cap;
   size_t len;
@@ -82,7 +85,12 @@ void send_signal(Module *mod, Module *modules, size_t num_modules) {
     int mod_num = find_module_by_name(modules, num_modules, mod->dests.data[i]);
     if (mod_num < 0) return;
 
-    if (mod->sending != NONE) modules[mod_num].last_sig_recvd = mod->sending;
+    if (mod->sending != NONE) {
+      modules[mod_num].last_sig_recvd = mod->sending;
+      if (mod->sending == HI) {
+      } else if (mod->sending == LO) {
+      }
+    }
 
     if (modules[mod_num].type == CON) {
       for (size_t j=0; j<modules[mod_num].as.con_module.inputs.len; j++) {
@@ -161,6 +169,7 @@ void print_module(Module mod) {
   if (mod.sending == HI) {
     printf("Sending HI to ");
     for (size_t i=0; i<mod.dests.len; i++) {
+      HI_PULSE_COUNT++;
       printf("%s ", mod.dests.data[i]);
     }
     printf("\n");
@@ -168,6 +177,7 @@ void print_module(Module mod) {
   else if (mod.sending == LO) {
     printf("Sending LO to ");
     for (size_t i=0; i<mod.dests.len; i++) {
+      LO_PULSE_COUNT++;
       printf("%s ", mod.dests.data[i]);
     }
     printf("\n");
@@ -279,6 +289,7 @@ int main(void) {
         modules[i].type = BROAD;
         modules[i].as.broadcaster = new_broadcaster();
 
+        LO_PULSE_COUNT++;
         modules[i].last_sig_recvd = LO;
         modules[i].sending = NONE;
 
@@ -303,7 +314,7 @@ int main(void) {
     }
   }
 
-  size_t steps = 8;
+  size_t steps = 6;
   printf("\n\nPushing the button!!!\n");
   for (size_t step=0; step<steps; step++) {
     for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
@@ -316,6 +327,7 @@ int main(void) {
   printf("\n\nPushing the button a second time!!!\n");
   int bcast_num = find_module_by_name(modules, num_lines, "broadcaster");
   modules[bcast_num].last_sig_recvd = LO;
+  LO_PULSE_COUNT++;
 
   for (size_t step=0; step<steps; step++) {
     for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
@@ -327,6 +339,7 @@ int main(void) {
 
   printf("\n\nPushing the button a third time!!!\n");
   modules[bcast_num].last_sig_recvd = LO;
+  LO_PULSE_COUNT++;
 
   for (size_t step=0; step<steps; step++) {
     for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
@@ -338,6 +351,7 @@ int main(void) {
 
   printf("\n\nPushing the button a fourth time!!!\n");
   modules[bcast_num].last_sig_recvd = LO;
+  LO_PULSE_COUNT++;
 
   for (size_t step=0; step<steps; step++) {
     for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
@@ -346,6 +360,9 @@ int main(void) {
     printf("Step %zu\n", step);
     for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
   }
+
+  printf("HI_PULSE_COUNT = %zu\n", HI_PULSE_COUNT);
+  printf("LO_PULSE_COUNT = %zu\n", LO_PULSE_COUNT);
 
   return 0;
 }
