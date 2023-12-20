@@ -70,23 +70,22 @@ typedef struct {
   } as;
 } Module;
 
-size_t find_module_by_name(Module *modules, size_t num_modules, char *name) {
+int find_module_by_name(Module *modules, size_t num_modules, char *name) {
   for (size_t i=0; i<num_modules; i++) {
     if (strcmp(modules[i].name, name)==0) return i;
   }
-  fprintf(stderr, "Searched for '%s', but could not find it\n", name);
-  exit(1);
+  return -1;
 }
 
 void send_signal(Module *mod, Module *modules, size_t num_modules) {
   for (size_t i=0; i<mod->dests.len; i++) {
-    size_t mod_num = find_module_by_name(modules, num_modules, mod->dests.data[i]);
+    int mod_num = find_module_by_name(modules, num_modules, mod->dests.data[i]);
+    if (mod_num < 0) return;
 
     if (mod->sending != NONE) modules[mod_num].last_sig_recvd = mod->sending;
 
     if (modules[mod_num].type == CON) {
       for (size_t j=0; j<modules[mod_num].as.con_module.inputs.len; j++) {
-        printf("\tTesting if %s equals %s\n", modules[mod_num].as.con_module.inputs.data[j], mod->dests.data[i]);
         if (strcmp(modules[mod_num].as.con_module.inputs.data[j], mod->name)==0) {
           if (mod->sending==HI) {
             modules[mod_num].as.con_module.last_recvd.data[j] = "T";
@@ -199,7 +198,7 @@ FF_Module new_ff_module(void) {
 
 void add_strings_to_dynarr(DynArr *da, char *str) {
   advance_past_chars(&str, " ");
-  assert(isalpha(*str) && "Expected a name here, but the value is not alphabetical");
+  if (strlen(str) == 0) return;
 
   char *val = str;
   while (*str) {
@@ -217,7 +216,8 @@ void add_strings_to_dynarr(DynArr *da, char *str) {
 }
 
 int main(void) {
-  char *file_path = "./test_input.txt";
+  // char *file_path = "./test_input.txt";
+  char *file_path = "./test_input2.txt";
   char *buffer;
   char **lines;
 
@@ -294,7 +294,8 @@ int main(void) {
 
   for (size_t i=0; i<num_lines; i++) {
     for (size_t d=0; d<modules[i].dests.len; d++) {
-      size_t mod_num = find_module_by_name(modules, num_lines, modules[i].dests.data[d]);
+      int mod_num = find_module_by_name(modules, num_lines, modules[i].dests.data[d]);
+      if (mod_num < 0) continue;
       if (modules[mod_num].type == CON) {
         add_to_dyn_array(&modules[mod_num].as.con_module.inputs, modules[i].name);
         add_to_dyn_array(&modules[mod_num].as.con_module.last_recvd, "F");
@@ -302,7 +303,42 @@ int main(void) {
     }
   }
 
-  size_t steps = 9;
+  size_t steps = 8;
+  printf("\n\nPushing the button!!!\n");
+  for (size_t step=0; step<steps; step++) {
+    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
+    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
+
+    printf("Step %zu\n", step);
+    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
+  }
+
+  printf("\n\nPushing the button a second time!!!\n");
+  int bcast_num = find_module_by_name(modules, num_lines, "broadcaster");
+  modules[bcast_num].last_sig_recvd = LO;
+
+  for (size_t step=0; step<steps; step++) {
+    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
+    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
+
+    printf("Step %zu\n", step);
+    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
+  }
+
+  printf("\n\nPushing the button a third time!!!\n");
+  modules[bcast_num].last_sig_recvd = LO;
+
+  for (size_t step=0; step<steps; step++) {
+    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
+    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
+
+    printf("Step %zu\n", step);
+    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
+  }
+
+  printf("\n\nPushing the button a fourth time!!!\n");
+  modules[bcast_num].last_sig_recvd = LO;
+
   for (size_t step=0; step<steps; step++) {
     for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
     for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
