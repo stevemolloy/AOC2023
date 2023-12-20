@@ -154,35 +154,35 @@ void process_signal(Module *mod) {
 }
 
 void print_module(Module mod) {
-  printf("%s: ", mod.name);
+  // printf("%s: ", mod.name);
   switch (mod.type) {
     case CON:
-      printf("conjunction module: ");
+      // printf("conjunction module: ");
       break;
     case BROAD:
-      printf("broadcaster module: ");
+      // printf("broadcaster module: ");
       break;
     case FF:
-      printf("flip-flop module (state = %d): ", mod.as.ff_module.state);
+      // printf("flip-flop module (state = %d): ", mod.as.ff_module.state);
       break;
   }
   if (mod.sending == HI) {
-    printf("Sending HI to ");
+    // printf("Sending HI to ");
     for (size_t i=0; i<mod.dests.len; i++) {
       HI_PULSE_COUNT++;
-      printf("%s ", mod.dests.data[i]);
+      // printf("%s ", mod.dests.data[i]);
     }
-    printf("\n");
+    // printf("\n");
   }
   else if (mod.sending == LO) {
-    printf("Sending LO to ");
+    // printf("Sending LO to ");
     for (size_t i=0; i<mod.dests.len; i++) {
       LO_PULSE_COUNT++;
-      printf("%s ", mod.dests.data[i]);
+      // printf("%s ", mod.dests.data[i]);
     }
-    printf("\n");
+    // printf("\n");
   }
-  else printf("\n");
+  // else printf("\n");
 
 }
 
@@ -227,7 +227,8 @@ void add_strings_to_dynarr(DynArr *da, char *str) {
 
 int main(void) {
   // char *file_path = "./test_input.txt";
-  char *file_path = "./test_input2.txt";
+  // char *file_path = "./test_input2.txt";
+  char *file_path = "./real_input.txt";
   char *buffer;
   char **lines;
 
@@ -289,8 +290,7 @@ int main(void) {
         modules[i].type = BROAD;
         modules[i].as.broadcaster = new_broadcaster();
 
-        LO_PULSE_COUNT++;
-        modules[i].last_sig_recvd = LO;
+        modules[i].last_sig_recvd = NONE;
         modules[i].sending = NONE;
 
         l++;
@@ -314,55 +314,24 @@ int main(void) {
     }
   }
 
-  size_t steps = 6;
-  printf("\n\nPushing the button!!!\n");
-  for (size_t step=0; step<steps; step++) {
-    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
-    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
+  for (size_t button_push=0; button_push<1000; button_push++) {
+    size_t steps = 6000;
+    printf("\n\nPushing the button (%zu)!!!\n", button_push);
+    int bcast_num = find_module_by_name(modules, num_lines, "broadcaster");
+    modules[bcast_num].last_sig_recvd = LO;
+    LO_PULSE_COUNT++;
+    for (size_t step=0; step<steps; step++) {
+      for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
+      for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
 
-    printf("Step %zu\n", step);
-    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
-  }
-
-  printf("\n\nPushing the button a second time!!!\n");
-  int bcast_num = find_module_by_name(modules, num_lines, "broadcaster");
-  modules[bcast_num].last_sig_recvd = LO;
-  LO_PULSE_COUNT++;
-
-  for (size_t step=0; step<steps; step++) {
-    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
-    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
-
-    printf("Step %zu\n", step);
-    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
-  }
-
-  printf("\n\nPushing the button a third time!!!\n");
-  modules[bcast_num].last_sig_recvd = LO;
-  LO_PULSE_COUNT++;
-
-  for (size_t step=0; step<steps; step++) {
-    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
-    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
-
-    printf("Step %zu\n", step);
-    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
-  }
-
-  printf("\n\nPushing the button a fourth time!!!\n");
-  modules[bcast_num].last_sig_recvd = LO;
-  LO_PULSE_COUNT++;
-
-  for (size_t step=0; step<steps; step++) {
-    for (size_t i=0; i<num_lines; i++) process_signal(&modules[i]);
-    for (size_t i=0; i<num_lines; i++) send_signal(&modules[i], modules, num_lines);
-
-    printf("Step %zu\n", step);
-    for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
+      // printf("Step %zu\n", step);
+      for (size_t i=0; i<num_lines; i++) print_module(modules[i]);
+    }
   }
 
   printf("HI_PULSE_COUNT = %zu\n", HI_PULSE_COUNT);
   printf("LO_PULSE_COUNT = %zu\n", LO_PULSE_COUNT);
+  printf("Answer to part 1 = %zu\n", HI_PULSE_COUNT * LO_PULSE_COUNT);
 
   return 0;
 }
